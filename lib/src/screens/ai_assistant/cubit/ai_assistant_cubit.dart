@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:obsi/src/core/ai_assistant/ai_assistant.dart';
-import 'package:obsi/src/core/ai_assistant/gemini_assistant.dart';
 import 'package:obsi/src/core/ai_assistant/history_storage.dart';
 import 'package:obsi/src/core/ai_assistant/tools/tools.dart';
 import 'package:obsi/src/core/ai_assistant/tools_registry.dart';
@@ -24,10 +22,10 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
   final _welcomeMessage = [
     "👋 Welcome to AI Assistant!",
     "",
-    "To get started, please enter your API key or configure settings.",
+    "To get started, please enter your API key.",
     "",
     "🔑 You can configure Base URL and Model Name in Settings.",
-    "Default is Google Gemini if not configured.",
+    "This app supports any OpenAI Compatible API (e.g., OpenAI, DeepSeek, Ollama).",
     "",
     "Your API key will be saved locally and securely on your device."
   ];
@@ -145,16 +143,11 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
       // var responseData =
       //     aiAssistant.analyzeResponse(response, taskManager.dateTemplate);
       // lastMessages.addCustomResponse(responseData);
-    } on GeminiException catch (e) {
-      SettingsController.getInstance().updateChatGptKey("");
-      aiAssistant?.apiKey = "";
-      lastMessages.clear();
-      lastMessages.addCustomResponse(_welcomeMessage, "text");
-      lastMessages =
-          AIAssistantMessagesWithError(lastMessages, "Invalid API key");
-      lastMessages.typingUser = null;
-      emit(lastMessages);
     } catch (e) {
+      // In case of error (e.g. invalid key), we might want to check the error message
+      // But general catch is safer for now.
+      // If we could detect 401 specifically, we could reset key.
+
       lastMessages.addCustomResponse(
           ["An error occurred while processing your request: $e."], "error");
       Logger().e("Error in AI Assistant: $e");
@@ -197,17 +190,9 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
     final baseUrl = settings.aiBaseUrl;
     final modelName = settings.aiModelName;
 
-    bool useOpenAI = (baseUrl != null && baseUrl.isNotEmpty) ||
-        (modelName != null &&
-            modelName.isNotEmpty &&
-            !modelName.toLowerCase().contains('gemini'));
-
-    if (useOpenAI) {
-      aiAssistant = ChatGptAssistant(apiKey, ToolsRegistry.getInstance(),
-          baseUrl: baseUrl, modelName: modelName);
-    } else {
-      aiAssistant = GeminiAssistant(apiKey, ToolsRegistry.getInstance());
-    }
+    // Always use ChatGptAssistant (OpenAI Compatible)
+    aiAssistant = ChatGptAssistant(apiKey, ToolsRegistry.getInstance(),
+        baseUrl: baseUrl, modelName: modelName);
 
     aiAssistant?.reInitialize(apiKey, baseUrl: baseUrl, modelName: modelName);
     _setupMessageListener();
