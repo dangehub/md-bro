@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 import 'package:obsi/src/core/utils.dart';
 
 import 'package:url_launcher/url_launcher.dart';
-import 'package:obsi/src/screens/subscription/subscription_screen.dart';
 
 import 'settings_controller.dart';
 import 'settings_service.dart';
@@ -188,309 +185,402 @@ class _SettingsViewState extends State<SettingsView> {
       body: SafeArea(
         bottom: true,
         child: ListView(children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(16),
-          //   // Glue the SettingsController to the theme selection DropdownButton.
-          //   //
-          //   // When a user selects a theme from the dropdown list, the
-          //   // SettingsController is updated, which rebuilds the MaterialApp.
-          //   child: DropdownButton<ThemeMode>(
-          //     // Read the selected themeMode from the controller
-          //     value: widget.controller.themeMode,
-          //     // Call the updateThemeMode method any time the user selects a theme.
-          //     onChanged: widget.controller.updateThemeMode,
-          //     items: const [
-          //       DropdownMenuItem(
-          //         value: ThemeMode.system,
-          //         child: Text('System Theme'),
-          //       ),
-          //       DropdownMenuItem(
-          //         value: ThemeMode.light,
-          //         child: Text('Light Theme'),
-          //       ),
-          //       DropdownMenuItem(
-          //         value: ThemeMode.dark,
-          //         child: Text('Dark Theme'),
-          //       )
-          //     ],
-          //   ),
-          // ),
+          // 1. General Settings
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ExpansionTile(
+              title: const Text("General",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              initiallyExpanded: true,
+              tilePadding: EdgeInsets.zero,
+              children: [
+                const SizedBox(height: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                        "Folder in the Obsidian vault containing tasks:"),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.controller.vaultDirectory ??
+                                "<Please choose the folder>",
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
+                        ),
+                        ElevatedButton(
+                            child: const Text("Select"),
+                            onPressed: () async {
+                              var vaultDirectory =
+                                  await SettingsController.selectVaultDirectory(
+                                      context);
 
-          // Padding(
-          //     padding: const EdgeInsets.all(16),
-          //     child: Column(children: [
-          //       const Align(
-          //           alignment: Alignment.centerLeft,
-          //           child: Text("Date format used in Obsidian: ")),
-          //       TextField(
-          //         controller: _dateTemplateController,
-          //       )
-          //     ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                        "File name for adding new tasks (located at the path below):")),
-                TextField(
-                  controller: _tasksFileNameController,
-                  onSubmitted: (value) {
-                    widget.controller.updateTasksFile(value);
-                  },
-                )
-              ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Global Task Filter: ")),
-                TextField(
-                  controller: _globalTaskFilterController,
-                  decoration: const InputDecoration(
-                    hintText: "Enter a global task filter, e.g. #task",
-                  ),
-                  onSubmitted: (value) {
-                    widget.controller.updateGlobalTaskFilter(value);
-                  },
-                )
-              ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("AI Assistant Settings",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 16),
-                    const Text("Base URL (e.g. https://api.openai.com/v1):"),
-                    TextField(
-                      controller: _aiBaseUrlController,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      decoration: const InputDecoration(
-                        hintText: "Enter base URL (optional)",
-                      ),
-                      onSubmitted: (value) {
-                        widget.controller.updateAiBaseUrl(value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const Text("API Key:"),
-                    TextField(
-                      controller: _aiApiKeyController,
-                      obscureText: true,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      decoration: const InputDecoration(
-                        hintText: "Enter API Key",
-                      ),
-                      onSubmitted: (value) {
-                        widget.controller.updateChatGptKey(value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const Text("Model Name (e.g. gpt-4o):"),
-                    TextField(
-                      controller: _aiModelNameController,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      decoration: const InputDecoration(
-                        hintText: "Enter model name",
-                      ),
-                      onSubmitted: (value) {
-                        widget.controller.updateAiModelName(value);
-                      },
-                    )
-                  ])),
-          // Memos Settings Section
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Memos Settings",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 16),
-                    const Text("Memos Path:"),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Static path (e.g., memos.md) or dynamic path with date variables (e.g., {{YYYY}}/{{YYYY-MM-DD}}.md)",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _memosPathController,
-                      decoration: const InputDecoration(
-                        hintText: "Enter memos path or template",
-                      ),
-                      onSubmitted: (value) {
-                        widget.controller.updateMemosPath(value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Dynamic Path:"),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Enable if path contains date variables like {{YYYY-MM-DD}}",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: widget.controller.memosPathIsDynamic,
-                          onChanged: (value) {
-                            widget.controller.updateMemosPathIsDynamic(value);
-                            setState(() {});
-                          },
-                        ),
+                              if (vaultDirectory != null) {
+                                widget.controller
+                                    .updateVaultDirectory(vaultDirectory);
+                              }
+                            }),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Widget Sort Order:"),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Ascending shows oldest memos first; Descending shows newest first",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Column(children: [
+                  const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Show on-boarding screen:")),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "Enable to show the on-boarding screen when the app starts",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
                           ),
                         ),
-                        SegmentedButton<bool>(
-                          segments: const [
-                            ButtonSegment(
-                              value: true,
-                              label: Text("Asc"),
-                            ),
-                            ButtonSegment(
-                              value: false,
-                              label: Text("Desc"),
-                            ),
-                          ],
-                          selected: {
-                            widget.controller.memosWidgetSortAscending
-                          },
-                          onSelectionChanged: (selected) {
-                            widget.controller
-                                .updateMemosWidgetSortAscending(selected.first);
-                            setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Text("附件目录 (Attachment Directory):"),
-                    const SizedBox(height: 4),
-                    Text(
-                      "相对于 Vault 的路径，支持日期变量。例如: assets 或 {{YYYY}}/assets",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _memosAttachmentDirController,
-                      decoration: const InputDecoration(
-                        hintText: "例如: assets 或 {{YYYY}}/assets",
-                      ),
-                      onSubmitted: (value) {
-                        _saveMemosAttachmentDir(value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const Text("Image Compression",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text("Enable Compression"),
-                      subtitle:
-                          const Text("Compress images before saving to vault"),
-                      value: _imageCompressionEnabled,
-                      onChanged: _updateImageCompressionEnabled,
-                    ),
-                    if (_imageCompressionEnabled) ...[
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        value: _imageCompressionFormat,
-                        decoration: const InputDecoration(
-                          labelText: "Format",
-                          border: OutlineInputBorder(),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                              value: 'webp', child: Text('WebP (Recommended)')),
-                          DropdownMenuItem(value: 'jpeg', child: Text('JPEG')),
-                          DropdownMenuItem(value: 'png', child: Text('PNG')),
-                        ],
+                      Switch(
+                        value: !widget.controller.onboardingComplete,
                         onChanged: (value) {
-                          if (value != null)
-                            _updateImageCompressionFormat(value);
+                          widget.controller.updateOnboardingComplete(!value);
+                          setState(() {});
                         },
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          const Text("Quality: "),
-                          Expanded(
-                            child: Slider(
-                              value: _imageCompressionQuality.toDouble(),
-                              min: 1,
-                              max: 100,
-                              divisions: 99,
-                              label: _imageCompressionQuality.toString(),
-                              onChanged: (value) {
-                                _updateImageCompressionQuality(value.round());
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                            width: 40,
-                            child: Text(
-                              "$_imageCompressionQuality%",
-                              textAlign: TextAlign.end,
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
-                  ])),
+                  ),
+                ]),
+                const SizedBox(height: 16),
+                Column(children: [
+                  const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Daily reminder to review tasks:")),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Text("Time: "),
+                      addDateTimePicker(
+                        widget.controller.reviewTasksReminderTime != null
+                            ? Text(
+                                DateFormat('HH:mm').format(
+                                    widget.controller.reviewTasksReminderTime!),
+                                style: const TextStyle(fontSize: 16),
+                              )
+                            : Text(
+                                'Not set',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                        widget.controller.reviewTasksReminderTime ??
+                            DateTime.now(),
+                        context,
+                        (time) {
+                          widget.controller.updateReviewTasksReminderTime(time);
+                          setState(() {});
+                        },
+                        timePicker: true,
+                      ),
+                      if (widget.controller.reviewTasksReminderTime != null)
+                        IconButton(
+                          onPressed: () {
+                            widget.controller
+                                .updateReviewTasksReminderTime(null);
+                            setState(() {});
+                          },
+                          icon: const Icon(Icons.clear),
+                          tooltip: 'Clear reminder',
+                        ),
+                    ],
+                  ),
+                ]),
+                const SizedBox(height: 16),
+                Column(children: [
+                  const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Daily reminder to review completed tasks:")),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Text("Time: "),
+                      addDateTimePicker(
+                        widget.controller.reviewCompletedReminderTime != null
+                            ? Text(
+                                DateFormat('HH:mm').format(widget
+                                    .controller.reviewCompletedReminderTime!),
+                                style: const TextStyle(fontSize: 16),
+                              )
+                            : Text(
+                                'Not set',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                        widget.controller.reviewCompletedReminderTime ??
+                            DateTime.now(),
+                        context,
+                        (time) {
+                          widget.controller
+                              .updateReviewCompletedReminderTime(time);
+                          setState(() {});
+                        },
+                        timePicker: true,
+                      ),
+                      if (widget.controller.reviewCompletedReminderTime != null)
+                        IconButton(
+                          onPressed: () {
+                            widget.controller
+                                .updateReviewCompletedReminderTime(null);
+                            setState(() {});
+                          },
+                          icon: const Icon(Icons.clear),
+                          tooltip: 'Clear reminder',
+                        ),
+                    ],
+                  ),
+                ]),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
 
+          // 2. Tasks Settings
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ExpansionTile(
-              title: const Text("Microblog Publishing",
+              title: const Text("Tasks",
                   style: TextStyle(fontWeight: FontWeight.bold)),
               tilePadding: EdgeInsets.zero,
               children: [
+                const SizedBox(height: 8),
+                Column(children: [
+                  const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                          "File name for adding new tasks (located at the path below):")),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _tasksFileNameController,
+                    onSubmitted: (value) {
+                      widget.controller.updateTasksFile(value);
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  )
+                ]),
+                const SizedBox(height: 16),
+                Column(children: [
+                  const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Global Task Filter: ")),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _globalTaskFilterController,
+                    decoration: const InputDecoration(
+                      hintText: "Enter a global task filter, e.g. #task",
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    onSubmitted: (value) {
+                      widget.controller.updateGlobalTaskFilter(value);
+                    },
+                  )
+                ]),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+
+          // 3. Memos Settings
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ExpansionTile(
+              title: const Text("Memos",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              tilePadding: EdgeInsets.zero,
+              children: [
+                const SizedBox(height: 8),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text("Memos Path:"),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Static path (e.g., memos.md) or dynamic path with date variables (e.g., {{YYYY}}/{{YYYY-MM-DD}}.md)",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _memosPathController,
+                    decoration: const InputDecoration(
+                      hintText: "Enter memos path or template",
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    onSubmitted: (value) {
+                      widget.controller.updateMemosPath(value);
+                    },
+                  ),
+                ]),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Dynamic Path:"),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Enable if path contains date variables like {{YYYY-MM-DD}}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: widget.controller.memosPathIsDynamic,
+                      onChanged: (value) {
+                        widget.controller.updateMemosPathIsDynamic(value);
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Widget Sort Order:"),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Ascending shows oldest memos first; Descending shows newest first",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SegmentedButton<bool>(
+                      segments: const [
+                        ButtonSegment(
+                          value: true,
+                          label: Text("Asc"),
+                        ),
+                        ButtonSegment(
+                          value: false,
+                          label: Text("Desc"),
+                        ),
+                      ],
+                      selected: {widget.controller.memosWidgetSortAscending},
+                      onSelectionChanged: (selected) {
+                        widget.controller
+                            .updateMemosWidgetSortAscending(selected.first);
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text("附件目录 (Attachment Directory):"),
+                const SizedBox(height: 4),
+                Text(
+                  "相对于 Vault 的路径，支持日期变量。例如: assets 或 {{YYYY}}/assets",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _memosAttachmentDirController,
+                  decoration: const InputDecoration(
+                    hintText: "例如: assets 或 {{YYYY}}/assets",
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onSubmitted: (value) {
+                    _saveMemosAttachmentDir(value);
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                const Text("Image Compression",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text("Enable Compression"),
+                  subtitle:
+                      const Text("Compress images before saving to vault"),
+                  value: _imageCompressionEnabled,
+                  onChanged: _updateImageCompressionEnabled,
+                ),
+                if (_imageCompressionEnabled) ...[
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _imageCompressionFormat,
+                    decoration: const InputDecoration(
+                      labelText: "Format",
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                          value: 'webp', child: Text('WebP (Recommended)')),
+                      DropdownMenuItem(value: 'jpeg', child: Text('JPEG')),
+                      DropdownMenuItem(value: 'png', child: Text('PNG')),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) _updateImageCompressionFormat(value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Text("Quality: "),
+                      Expanded(
+                        child: Slider(
+                          value: _imageCompressionQuality.toDouble(),
+                          min: 1,
+                          max: 100,
+                          divisions: 99,
+                          label: _imageCompressionQuality.toString(),
+                          onChanged: (value) {
+                            _updateImageCompressionQuality(value.round());
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 40,
+                        child: Text(
+                          "$_imageCompressionQuality%",
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 16),
+                const Divider(),
+                const Text("Microblog Publishing",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _microblogFilenameController,
@@ -561,7 +651,8 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
                 const SizedBox(height: 20),
                 const Text("Push Configuration (GitHub)",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.grey)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogRepoUrlController,
@@ -623,227 +714,82 @@ class _SettingsViewState extends State<SettingsView> {
             ),
           ),
 
+          // 4. AI Settings
           Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Include tasks with today due day:")),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ExpansionTile(
+              title: const Text("AI Assistant",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              tilePadding: EdgeInsets.zero,
+              children: [
                 const SizedBox(height: 8),
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        "Show tasks that are due today in the 'Today' view",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                    const Text("Base URL (e.g. https://api.openai.com/v1):"),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _aiBaseUrlController,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      decoration: const InputDecoration(
+                        hintText: "Enter base URL (optional)",
+                        border: OutlineInputBorder(),
+                        isDense: true,
                       ),
-                    ),
-                    Switch(
-                      value: widget.controller.includeDueTasksInToday,
-                      onChanged: (value) {
-                        widget.controller.updateIncludeDueTasksInToday(value);
-                        setState(() {
-                          // Trigger UI rebuild after setting update
-                        });
+                      onSubmitted: (value) {
+                        widget.controller.updateAiBaseUrl(value);
                       },
                     ),
                   ],
                 ),
-              ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Show on-boarding screen:")),
-                const SizedBox(height: 8),
-                Row(
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        "Enable to show the on-boarding screen when the app starts",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                    const Text("API Key:"),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _aiApiKeyController,
+                      obscureText: true,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      decoration: const InputDecoration(
+                        hintText: "Enter API Key",
+                        border: OutlineInputBorder(),
+                        isDense: true,
                       ),
-                    ),
-                    Switch(
-                      value: !widget.controller.onboardingComplete,
-                      onChanged: (value) {
-                        widget.controller.updateOnboardingComplete(!value);
-                        setState(() {
-                          // Trigger UI rebuild after setting update
-                        });
+                      onSubmitted: (value) {
+                        widget.controller.updateChatGptKey(value);
                       },
                     ),
                   ],
                 ),
-              ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Daily reminder to review tasks:")),
-                const SizedBox(height: 8),
-                Row(
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Time: "),
-                    addDateTimePicker(
-                      widget.controller.reviewTasksReminderTime != null
-                          ? Text(
-                              DateFormat('HH:mm').format(
-                                  widget.controller.reviewTasksReminderTime!),
-                              style: const TextStyle(fontSize: 16),
-                            )
-                          : Text(
-                              'Not set',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                      widget.controller.reviewTasksReminderTime ??
-                          DateTime.now(),
-                      context,
-                      (time) {
-                        widget.controller.updateReviewTasksReminderTime(time);
-                        setState(() {
-                          // Trigger UI rebuild after time update
-                        });
-                      },
-                      timePicker: true,
-                    ),
-                    if (widget.controller.reviewTasksReminderTime != null)
-                      IconButton(
-                        onPressed: () {
-                          widget.controller.updateReviewTasksReminderTime(null);
-                          setState(() {
-                            // Trigger UI rebuild after clearing time
-                          });
-                        },
-                        icon: const Icon(Icons.clear),
-                        tooltip: 'Clear reminder',
+                    const Text("Model Name (e.g. gpt-4o):"),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _aiModelNameController,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      decoration: const InputDecoration(
+                        hintText: "Enter model name",
+                        border: OutlineInputBorder(),
+                        isDense: true,
                       ),
+                      onSubmitted: (value) {
+                        widget.controller.updateAiModelName(value);
+                      },
+                    ),
                   ],
                 ),
-              ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Daily reminder to review completed tasks:")),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Text("Time: "),
-                    addDateTimePicker(
-                      widget.controller.reviewCompletedReminderTime != null
-                          ? Text(
-                              DateFormat('HH:mm').format(widget
-                                  .controller.reviewCompletedReminderTime!),
-                              style: const TextStyle(fontSize: 16),
-                            )
-                          : Text(
-                              'Not set',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                      widget.controller.reviewCompletedReminderTime ??
-                          DateTime.now(),
-                      context,
-                      (time) {
-                        widget.controller
-                            .updateReviewCompletedReminderTime(time);
-                        setState(() {
-                          // Trigger UI rebuild after time update
-                        });
-                      },
-                      timePicker: true,
-                    ),
-                    if (widget.controller.reviewCompletedReminderTime != null)
-                      IconButton(
-                        onPressed: () {
-                          widget.controller
-                              .updateReviewCompletedReminderTime(null);
-                          setState(() {
-                            // Trigger UI rebuild after clearing time
-                          });
-                        },
-                        icon: const Icon(Icons.clear),
-                        tooltip: 'Clear reminder',
-                      ),
-                  ],
-                ),
-              ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                            "Folder in the Obsidian vault containing tasks:"))),
-                Text(widget.controller.vaultDirectory ??
-                    "<Please choose the folder>")
-              ])),
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                  child: const Text("Select"),
-                  onPressed: () async {
-                    var vaultDirectory =
-                        await SettingsController.selectVaultDirectory(context);
-
-                    if (vaultDirectory != null) {
-                      widget.controller.updateVaultDirectory(vaultDirectory);
-                    }
-                  })),
-
-          // Subscription Section
-          Platform.isIOS
-              ? SizedBox()
-              : Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Card(
-                    child: ListTile(
-                      leading: Icon(
-                        widget.controller.hasActiveSubscription
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: widget.controller.hasActiveSubscription
-                            ? Colors.amber
-                            : Colors.grey,
-                      ),
-                      title: Text(
-                        widget.controller.hasActiveSubscription
-                            ? 'Premium Active'
-                            : 'Upgrade to Premium',
-                      ),
-                      subtitle: Text(
-                        widget.controller.hasActiveSubscription
-                            ? 'Manage your subscription'
-                            : 'Unlock all features',
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          SubscriptionScreen.routeName,
-                          arguments: widget.controller,
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
 
           Padding(
               padding: const EdgeInsets.all(16),
@@ -853,7 +799,7 @@ class _SettingsViewState extends State<SettingsView> {
                   onTap: () {
                     _launchEmail(context);
                   },
-                  child: const Text("support@mdbro.app",
+                  child: const Text("wanyy314@foxmail.com",
                       style: TextStyle(
                         color: Colors.blue,
                         fontSize: 16,
@@ -887,7 +833,7 @@ class _SettingsViewState extends State<SettingsView> {
   Future<void> _launchEmail(BuildContext context) async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: "support@mdbro.app",
+      path: "wanyy314@foxmail.com",
       query: 'subject=MD Bro', // Optional query parameters
     );
     if (await canLaunchUrl(emailUri)) {
