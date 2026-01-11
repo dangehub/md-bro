@@ -16,7 +16,7 @@ class AIAssistantMessages extends AIAssistantState {
     id: 'baeb2c47-c0ea-468e-b6a5-563341f995e3',
   );
   static const aiUser = types.User(
-    firstName: "VaultMate",
+    firstName: "MD Bro",
     id: 'af25d069-4513-4724-a0f2-d4fba793c356',
   );
   types.User? typingUser;

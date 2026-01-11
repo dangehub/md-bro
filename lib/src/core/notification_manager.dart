@@ -241,8 +241,8 @@ class NotificationManager {
 
   static AndroidNotificationDetails _androidNotificationDetails() {
     return AndroidNotificationDetails(
-      'obsi_channel_id',
-      'obsi_channel_name',
+      'vaultmate_channel_id',
+      'MD Bro Notifications',
       icon: 'ic_notification', // Path to your app icon
       importance: Importance.high,
       priority: Priority.high,
