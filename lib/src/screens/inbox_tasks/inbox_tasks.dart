@@ -98,6 +98,11 @@ class InboxTasks extends StatelessWidget with WidgetsBindingObserver {
                           context, state.tasks, _inboxTaskCubit.searchQuery);
                     }
 
+                    if (state is InboxTasksUndoAvailable) {
+                      return _showListView(
+                          context, state.tasks, _inboxTaskCubit.searchQuery);
+                    }
+
                     return Container();
                   }),
             ),
@@ -572,11 +577,34 @@ class InboxTasks extends StatelessWidget with WidgetsBindingObserver {
     bool isScheduledToday =
         TaskManager.sameDate(task.scheduled, DateTime.now());
 
-    return TaskCard(task, hightlightedText: highlightedText,
-        taskDonePressed: (bool? res) {
+    // Check if this task has a pending undo action
+    final state = _inboxTaskCubit.state;
+    final isUndoPending = state is InboxTasksUndoAvailable &&
+        (state.taskId == task.taskSource?.id.toString() ||
+            state.taskId == task.description);
+
+    // Callback for undo action
+    final undoCallback = isUndoPending
+        ? () => _inboxTaskCubit
+            .undoTaskStatusChange((state as InboxTasksUndoAvailable).taskId)
+        : null;
+
+    TaskStatus? overrideStatus;
+    if (isUndoPending) {
+      overrideStatus = (state as InboxTasksUndoAvailable).wasCompleted
+          ? TaskStatus.done
+          : TaskStatus.todo;
+    }
+
+    return TaskCard(task,
+        hightlightedText: highlightedText,
+        isUndoPending: isUndoPending,
+        overrideStatus: overrideStatus,
+        undoCallback: undoCallback, taskDonePressed: (bool? res) {
       if (res != null) {
-        _inboxTaskCubit.changeTaskStatus(
-            task, res == true ? TaskStatus.done : TaskStatus.todo);
+        final newStatus = res == true ? TaskStatus.done : TaskStatus.todo;
+        // Just call the method, no SnackBar needed as TaskCard handles UI
+        _inboxTaskCubit.changeTaskStatusWithUndo(task, newStatus);
       }
     }, editTaskPressed: () {
       Navigator.push(

@@ -63,6 +63,8 @@ class HomeWidgetHandler {
     await HomeWidget.saveWidgetData<String>(key, value);
     await HomeWidget.updateWidget(
         name: 'ObsiWidgetReceiver', iOSName: 'HomeWidget');
+    await HomeWidget.updateWidget(
+        name: 'CombinedWidgetReceiver', iOSName: 'HomeWidget');
   }
 
   static Future<List<Map<String, dynamic>>?> _getWidgetTasks() async {

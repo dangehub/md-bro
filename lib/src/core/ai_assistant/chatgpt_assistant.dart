@@ -8,9 +8,14 @@ import 'package:openai_dart/openai_dart.dart';
 
 class ChatGptAssistant extends AIAssistant {
   final Map<int, Completer<bool>> _pendingConfirmations = {};
+  final Map<int, Completer<String?>> _pendingDataReviews = {};
 
-  ChatGptAssistant(super.apiKey, super.toolsRegistry,
-      {super.baseUrl, super.modelName});
+  ChatGptAssistant(
+    super.apiKey,
+    super.toolsRegistry, {
+    super.baseUrl,
+    super.modelName,
+  });
 
   @override
   void reInitialize(String apiKey, {String? baseUrl, String? modelName}) {
@@ -20,8 +25,11 @@ class ChatGptAssistant extends AIAssistant {
   }
 
   @override
-  Future<String?> chat(List<ChatCompletionMessage> messages,
-      String currentDateTime, String vault) async {
+  Future<String?> chat(
+    List<ChatCompletionMessage> messages,
+    String currentDateTime,
+    String vault,
+  ) async {
     final client = OpenAIClient(
       apiKey: apiKey ?? "",
       baseUrl: baseUrl?.isNotEmpty == true ? baseUrl : null,
@@ -42,7 +50,8 @@ class ChatGptAssistant extends AIAssistant {
     // Let's modify the first message if it is system, or insert new one.
 
     // For OpenAI compatible with tool prompt hacking (JSON mode):
-    String toolInstruction = """
+    String toolInstruction =
+        """
 \n
 You have access to the following tools:
 $toolsDesc
@@ -64,10 +73,13 @@ If performing actions, "final_answer" should be null or empty string until the a
         conversation.first is ChatCompletionSystemMessage) {
       var sysMsg = conversation.first as ChatCompletionSystemMessage;
       conversation[0] = ChatCompletionMessage.system(
-          content: sysMsg.content + toolInstruction);
+        content: sysMsg.content + toolInstruction,
+      );
     } else {
       conversation.insert(
-          0, ChatCompletionMessage.system(content: toolInstruction));
+        0,
+        ChatCompletionMessage.system(content: toolInstruction),
+      );
     }
 
     // ReAct Loop
@@ -82,11 +94,12 @@ If performing actions, "final_answer" should be null or empty string until the a
       CreateChatCompletionResponse res;
       try {
         res = await client.createChatCompletion(
-            request: CreateChatCompletionRequest(
-          model: ChatCompletionModel.modelId(modelName ?? 'gpt-3.5-turbo'),
-          messages: conversation,
-          temperature: 0.3,
-        ));
+          request: CreateChatCompletionRequest(
+            model: ChatCompletionModel.modelId(modelName ?? 'gpt-3.5-turbo'),
+            messages: conversation,
+            temperature: 0.3,
+          ),
+        );
       } catch (e) {
         Logger().e("OpenAI Chat Error: $e");
         // Fallback: try without json_mode if it failed?
@@ -127,11 +140,16 @@ If performing actions, "final_answer" should be null or empty string until the a
 
         // Append Tool Output to Conversation
         // We simulate this as a User Message observing the output
-        conversation.add(ChatCompletionMessage.assistant(
-            content: content)); // Add the AI's JSON response
-        conversation.add(ChatCompletionMessage.user(
+        conversation.add(
+          ChatCompletionMessage.assistant(content: content),
+        ); // Add the AI's JSON response
+        conversation.add(
+          ChatCompletionMessage.user(
             content: ChatCompletionUserMessageContent.string(
-                "Observation:\n${toolResultBuffer.toString()}")));
+              "Observation:\n${toolResultBuffer.toString()}",
+            ),
+          ),
+        );
 
         // Continue loop
       } else {
@@ -161,12 +179,14 @@ If performing actions, "final_answer" should be null or empty string until the a
           var completer = Completer<bool>();
           _pendingConfirmations[action.id] = completer;
 
-          emitMessage(AIMessage.toolConfirmation({
-            'actionId': action.id,
-            'name': functionName,
-            'parameters': parameters,
-            'description': toolsRegistry.getDescription(functionName),
-          }));
+          emitMessage(
+            AIMessage.toolConfirmation({
+              'actionId': action.id,
+              'name': functionName,
+              'parameters': parameters,
+              'description': toolsRegistry.getDescription(functionName),
+            }),
+          );
 
           var allowed = await completer.future;
           _pendingConfirmations.remove(action.id);
@@ -176,9 +196,34 @@ If performing actions, "final_answer" should be null or empty string until the a
           }
         }
 
-        Logger()
-            .i("Calling function $functionName with parameters $parameters");
+        Logger().i(
+          "Calling function $functionName with parameters $parameters",
+        );
         res = await toolsRegistry.callFunction(functionName, parameters);
+
+        // Check if requires review (for read operations that return data)
+        if (toolsRegistry.requiresReview(functionName)) {
+          var reviewCompleter = Completer<String?>();
+          _pendingDataReviews[action.id] = reviewCompleter;
+
+          emitMessage(
+            AIMessage.dataReview({
+              'actionId': action.id,
+              'name': functionName,
+              'parameters': parameters,
+              'description': toolsRegistry.getDescription(functionName),
+              'data': res, // The actual data to be reviewed
+            }),
+          );
+
+          var reviewedData = await reviewCompleter.future;
+          _pendingDataReviews.remove(action.id);
+
+          if (reviewedData == null) {
+            return "$functionName(${parameters.join(", ")}) - User declined to share this data.\n";
+          }
+          res = reviewedData; // Use potentially edited data
+        }
       } catch (e) {
         Logger().e("Error calling function $functionName: $e");
         res = "Error: $e";
@@ -201,6 +246,17 @@ If performing actions, "final_answer" should be null or empty string until the a
       Logger().w('No pending confirmation for actionId $actionId');
     }
   }
+
+  /// Handle user's data review decision
+  /// [reviewedData] is the potentially edited data, or null if user declined
+  Future<void> confirmDataReview(int actionId, String? reviewedData) async {
+    var completer = _pendingDataReviews[actionId];
+    if (completer != null && !completer.isCompleted) {
+      completer.complete(reviewedData);
+    } else {
+      Logger().w('No pending data review for actionId $actionId');
+    }
+  }
 }
 
 class ResponseWithAction {
@@ -208,11 +264,7 @@ class ResponseWithAction {
   final List<Action>? actions;
   final String? finalAnswer;
 
-  ResponseWithAction({
-    required this.thought,
-    this.actions,
-    this.finalAnswer,
-  });
+  ResponseWithAction({required this.thought, this.actions, this.finalAnswer});
 
   factory ResponseWithAction.fromJson(Map<String, dynamic> json) {
     // Validate required field

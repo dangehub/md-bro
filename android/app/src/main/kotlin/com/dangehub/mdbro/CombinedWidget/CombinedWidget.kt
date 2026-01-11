@@ -306,6 +306,17 @@ class CombinedWidget : GlanceAppWidget() {
             )
             Spacer(modifier = GlanceModifier.defaultWeight())
             
+            // Refresh Button
+            Image(
+                provider = ImageProvider(resId = R.drawable.circular_refresh_button),
+                contentDescription = "Refresh",
+                modifier = GlanceModifier
+                    .height(28.dp)
+                    .width(28.dp)
+                    .padding(end = 4.dp)
+                    .clickable(actionRunCallback<RefreshActionCallback>())
+            )
+
             // Add Task button (checkbox icon)
             Image(
                 provider = ImageProvider(resId = R.drawable.ic_todo),

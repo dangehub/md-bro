@@ -19,3 +19,18 @@ final class InboxTasksMessage extends InboxTasksState {
   final List<Task> tasks;
   InboxTasksMessage(this.message, this.tasks);
 }
+
+/// State indicating an undo action is available for a task status change
+final class InboxTasksUndoAvailable extends InboxTasksState {
+  final List<Task> tasks;
+  final String taskId;
+  final String taskDescription;
+  final bool wasCompleted; // true if task was marked done, false if unmarked
+
+  InboxTasksUndoAvailable({
+    required this.tasks,
+    required this.taskId,
+    required this.taskDescription,
+    required this.wasCompleted,
+  });
+}

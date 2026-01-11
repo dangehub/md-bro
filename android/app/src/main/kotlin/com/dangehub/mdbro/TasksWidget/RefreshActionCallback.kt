@@ -16,10 +16,8 @@ class RefreshActionCallback : ActionCallback {
     ) {
        Log.d("ObsiWidget", "Refresh button clicked")
         // Call the requestTasks method to trigger background intent
-        ObsiWidget().apply {
-            // val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(context,
-            //     "obsiWidget://request_tasks".toUri())
-            // backgroundIntent.send()
-        }
+        val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(context,
+            "obsiWidget://request_tasks".toUri())
+        backgroundIntent.send()
     }
 }

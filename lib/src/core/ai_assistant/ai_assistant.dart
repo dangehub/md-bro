@@ -18,7 +18,8 @@ enum AIMessageType {
   loading,
   streamToken,
   done,
-  toolConfirmation
+  toolConfirmation,
+  dataReview, // New: requires user review before sending data to AI
 }
 
 class AIMessage {
@@ -33,7 +34,9 @@ class AIMessage {
   AIMessage.streamToken(String token) : this(AIMessageType.streamToken, token);
   AIMessage.done() : this(AIMessageType.done, null);
   AIMessage.toolConfirmation(Map<String, dynamic> payload)
-      : this(AIMessageType.toolConfirmation, payload);
+    : this(AIMessageType.toolConfirmation, payload);
+  AIMessage.dataReview(Map<String, dynamic> payload)
+    : this(AIMessageType.dataReview, payload);
 
   AIMessage(this.type, this.content, [this.error]);
 }
@@ -55,20 +58,24 @@ abstract class AIAssistant with ChangeNotifier {
     return ChatGptAssistant(apiKey, toolsRegistry);
   }
 
-  Future<String?> chat(List<ChatCompletionMessage> messages,
-      String currentDateTime, String vault);
+  Future<String?> chat(
+    List<ChatCompletionMessage> messages,
+    String currentDateTime,
+    String vault,
+  );
 
   Future<void> confirmToolAction(int actionId, bool allowed);
 
   void reInitialize(String apiKey, {String? baseUrl, String? modelName});
 
   List<ChatCompletionMessage> addSystemPrompt(
-      List<ChatCompletionMessage> messages, String? currentDateTime) {
+    List<ChatCompletionMessage> messages,
+    String? currentDateTime,
+  ) {
     messages.insert(
-        0,
-        ChatCompletionMessage.system(
-          content: getSystemPrompt(),
-        ));
+      0,
+      ChatCompletionMessage.system(content: getSystemPrompt()),
+    );
 
     return messages;
   }
@@ -99,8 +106,9 @@ abstract class AIAssistant with ChangeNotifier {
         // Parse the task
         TaskSource? taskSource = _extractTaskSource(taskContent);
         var task = TaskParser().build(
-            taskContent.split(sourceInfoMarker).first.trim(),
-            taskSource: taskSource);
+          taskContent.split(sourceInfoMarker).first.trim(),
+          taskSource: taskSource,
+        );
 
         Logger().i("Response task: $task");
         result.add(task);
@@ -121,8 +129,9 @@ abstract class AIAssistant with ChangeNotifier {
   }
 
   TaskSource? _extractTaskSource(String taskContent) {
-    var taskSourcePattern =
-        RegExp('$sourceInfoMarker' + r'(\d+);(.+);(\d+);(\d+)');
+    var taskSourcePattern = RegExp(
+      '$sourceInfoMarker' + r'(\d+);(.+);(\d+);(\d+)',
+    );
     var match = taskSourcePattern.firstMatch(taskContent);
     if (match != null) {
       var fileNumber = int.parse(match.group(1)!);
@@ -145,7 +154,8 @@ abstract class AIAssistant with ChangeNotifier {
   }
 
   String getContextData(String tasks, String? currentDateTime) {
-    var contextData = '''
+    var contextData =
+        '''
       Today is $currentDateTime. These are user's tasks in markdown format where
       sign ➕ means task is added,
        📅 - task has due date,
@@ -168,12 +178,14 @@ $tasks
 
   String serializedTasks(List<Task> tasks, String dateTemplate) {
     var serializedTask = "";
-    serializedTask += tasks.map((task) {
-      var str = TaskParser().toTaskString(task, dateTemplate: dateTemplate);
-      str +=
-          '$sourceInfoMarker${task.taskSource?.fileNumber};${task.taskSource?.fileName};${task.taskSource?.offset};${task.taskSource?.length}';
-      return str;
-    }).join("\n");
+    serializedTask += tasks
+        .map((task) {
+          var str = TaskParser().toTaskString(task, dateTemplate: dateTemplate);
+          str +=
+              '$sourceInfoMarker${task.taskSource?.fileNumber};${task.taskSource?.fileName};${task.taskSource?.offset};${task.taskSource?.length}';
+          return str;
+        })
+        .join("\n");
     return serializedTask;
   }
 

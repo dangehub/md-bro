@@ -27,7 +27,7 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
     "🔑 You can configure Base URL and Model Name in Settings.",
     "This app supports any OpenAI Compatible API (e.g., OpenAI, DeepSeek, Ollama).",
     "",
-    "Your API key will be saved locally and securely on your device."
+    "Your API key will be saved locally and securely on your device.",
   ];
 
   AIAssistant? aiAssistant;
@@ -63,16 +63,43 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
   }
 
   void _registerTools() {
-    ToolsRegistry.getInstance().registerFunction("get_tasks",
-        "get_tasks(): Returns available tasks.", () => tools.getTasksTool());
+    // Time tool - no privacy data, no review required
+    ToolsRegistry.getInstance().registerFunction(
+      "get_current_time",
+      "get_current_time(): 获取当前日期时间(YYYY-MM-DD HH:mm 星期X)，无需参数",
+      () => tools.getCurrentTime(),
+      review: false,
+    );
 
-    ToolsRegistry.getInstance().registerFunction("get_file_list",
-        "get_file_list(): Returns list of files.", () => tools.getFileList());
+    // Task filter tool - with filter parameter
+    ToolsRegistry.getInstance().registerFunction(
+      "get_tasks",
+      "get_tasks(filter): 获取任务。Filter语法: scheduled:today|tomorrow|this_week|this_month|overdue|next_N_days|no_date status:todo|done tag:#标签名 path:路径片段 logic:and|or。示例: get_tasks(\"scheduled:today status:todo\")",
+      (filter) => tools.getTasksFiltered(filter),
+      review: true,
+    );
+
+    // Memos filter tool - with filter parameter
+    ToolsRegistry.getInstance().registerFunction(
+      "get_memos",
+      "get_memos(filter): 获取Memos。Filter语法: date:today|yesterday|this_week|YYYY-MM-DD|YYYY-MM-DD~YYYY-MM-DD limit:N。示例: get_memos(\"date:today\"), get_memos(\"date:2026-01-01~2026-01-07 limit:10\")",
+      (filter) => tools.getMemosFiltered(filter),
+      review: true,
+    );
 
     ToolsRegistry.getInstance().registerFunction(
-        "get_file_content",
-        "get_file_content(full_file_name): Returns content of the file.",
-        (fileName) => tools.getFileContentTool(fileName));
+      "get_file_list",
+      "get_file_list(): Returns list of files.",
+      () => tools.getFileList(),
+      review: true,
+    );
+
+    ToolsRegistry.getInstance().registerFunction(
+      "get_file_content",
+      "get_file_content(full_file_name): Returns content of the file.",
+      (fileName) => tools.getFileContentTool(fileName),
+      review: true,
+    );
 
     // ToolsRegistry.getInstance().registerFunction(
     //     "rename_file",
@@ -81,34 +108,40 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
     //         tools.renameFileTool(oldFileName, newFileName));
 
     ToolsRegistry.getInstance().registerFunction(
-        "change_task",
-        "change_task(old_task_name, new_task_content): Changes task. old_task_name is beginning of the task description. new_task_content is full task content. ",
-        (oldTaskName, newTaskContent) =>
-            tools.changeTaskTool(oldTaskName, newTaskContent),
-        confirm: true);
+      "change_task",
+      "change_task(old_task_name, new_task_content): Changes task. old_task_name is beginning of the task description. new_task_content is full task content. ",
+      (oldTaskName, newTaskContent) =>
+          tools.changeTaskTool(oldTaskName, newTaskContent),
+      confirm: true,
+    );
 
     ToolsRegistry.getInstance().registerFunction(
-        "write_file_content",
-        "write_file_content(full_file_name, content): Writes content to the file.",
-        (fileName, content) => tools.writeFileContentTool(fileName, content),
-        confirm: true);
+      "write_file_content",
+      "write_file_content(full_file_name, content): Writes content to the file.",
+      (fileName, content) => tools.writeFileContentTool(fileName, content),
+      confirm: true,
+    );
 
     ToolsRegistry.getInstance().registerFunction(
-        "find_task",
-        "find_task(task_name): Finds a task by beginning of its description.",
-        (taskName) => tools.findTask(taskName));
+      "find_task",
+      "find_task(task_name): Finds a task by beginning of its description.",
+      (taskName) => tools.findTask(taskName),
+      review: true,
+    );
 
     ToolsRegistry.getInstance().registerFunction(
-        "httpPost",
-        "httpPost(uri, param): Calls http post method at specified uri and pass param to it.",
-        (uri, param) => tools.httpPost(uri, param),
-        confirm: true);
+      "httpPost",
+      "httpPost(uri, param): Calls http post method at specified uri and pass param to it.",
+      (uri, param) => tools.httpPost(uri, param),
+      confirm: true,
+    );
 
     ToolsRegistry.getInstance().registerFunction(
-        "httpGet",
-        "httpGet(uri): Calls http get method at specified uri.",
-        (uri, param) => tools.httpGet(uri),
-        confirm: true);
+      "httpGet",
+      "httpGet(uri): Calls http get method at specified uri.",
+      (uri, param) => tools.httpGet(uri),
+      confirm: true,
+    );
   }
 
   void _setupMessageListener() {
@@ -118,27 +151,29 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
 
   Future<void> sendMessage(String message) async {
     lastMessages.typingUser = AIAssistantMessages.aiUser;
+
+    // Check if API key is configured
     if (aiAssistant?.apiKey == null || aiAssistant?.apiKey == "") {
-      SettingsController.getInstance().updateChatGptKey(message);
-      _initializeAIAssistant();
-      message = "";
-      lastMessages.clear();
       lastMessages = AIAssistantMessages(lastMessages);
-      lastMessages.addRequest("Hi");
-      lastMessages.typingUser = AIAssistantMessages.aiUser;
-    } else {
-      lastMessages = AIAssistantMessages(lastMessages);
-      lastMessages.addRequest(message);
-      await _historyStorage?.appendMessageToLog(message, true);
-      lastMessages.typingUser = AIAssistantMessages.aiUser;
+      lastMessages.addCustomResponse(
+          ["❌ API Key 未配置。请在设置页面的 AI 助手分类中填写 API Key。"], "error");
+      lastMessages.typingUser = null;
       emit(lastMessages);
+      return;
     }
+
+    lastMessages = AIAssistantMessages(lastMessages);
+    lastMessages.addRequest(message);
+    await _historyStorage?.appendMessageToLog(message, true);
+    lastMessages.typingUser = AIAssistantMessages.aiUser;
+    emit(lastMessages);
 
     try {
       await aiAssistant?.chat(
-          _aiConversationHistory(),
-          DateFormat(_taskManager.dateTemplate).format(DateTime.now()),
-          _taskManager.vaultPath);
+        _aiConversationHistory(),
+        DateFormat(_taskManager.dateTemplate).format(DateTime.now()),
+        _taskManager.vaultPath,
+      );
       lastMessages = AIAssistantMessages(lastMessages);
       // var responseData =
       //     aiAssistant.analyzeResponse(response, taskManager.dateTemplate);
@@ -148,28 +183,31 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
       // But general catch is safer for now.
       // If we could detect 401 specifically, we could reset key.
 
-      lastMessages.addCustomResponse(
-          ["An error occurred while processing your request: $e."], "error");
+      lastMessages.addCustomResponse([
+        "An error occurred while processing your request: $e.",
+      ], "error");
       Logger().e("Error in AI Assistant: $e");
       lastMessages.typingUser = null;
       emit(lastMessages);
     }
   }
 
-//This method converts chat history in ChatGPT conversation history to provide context of the conversation.
+  //This method converts chat history in ChatGPT conversation history to provide context of the conversation.
   List<ChatCompletionMessage> _aiConversationHistory() {
     return lastMessages.messages.reversed.map<ChatCompletionMessage>((el) {
       if (el is msg_types.TextMessage) {
         return el.author.id == AIAssistantMessages.user.id
             ? ChatCompletionMessage.user(
-                content: ChatCompletionUserMessageContent.string(el.text))
+                content: ChatCompletionUserMessageContent.string(el.text),
+              )
             : ChatCompletionMessage.assistant(content: el.text);
       } else {
         if (el is msg_types.CustomMessage) {
           var response = el.metadata?['response'];
           if (response is List) {
             return ChatCompletionMessage.assistant(
-                content: response.map((e) => e.toString()).join("\n"));
+              content: response.map((e) => e.toString()).join("\n"),
+            );
           }
         }
       }
@@ -191,8 +229,12 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
     final modelName = settings.aiModelName;
 
     // Always use ChatGptAssistant (OpenAI Compatible)
-    aiAssistant = ChatGptAssistant(apiKey, ToolsRegistry.getInstance(),
-        baseUrl: baseUrl, modelName: modelName);
+    aiAssistant = ChatGptAssistant(
+      apiKey,
+      ToolsRegistry.getInstance(),
+      baseUrl: baseUrl,
+      modelName: modelName,
+    );
 
     aiAssistant?.reInitialize(apiKey, baseUrl: baseUrl, modelName: modelName);
     _setupMessageListener();
@@ -214,13 +256,24 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
             }
           }
         } else {
-          lastMessages
-              .addCustomResponse([message.content], "tool_confirmation");
-          var assistantMessage =
-              AIAssistantMessages(AIAssistantMessages(lastMessages));
+          lastMessages.addCustomResponse([
+            message.content,
+          ], "tool_confirmation");
+          var assistantMessage = AIAssistantMessages(
+            AIAssistantMessages(lastMessages),
+          );
           assistantMessage.typingUser = null;
           emit(assistantMessage);
         }
+        break;
+      case AIMessageType.dataReview:
+        // Always show data review dialog (no auto-approve for sensitive data)
+        lastMessages.addCustomResponse([message.content], "data_review");
+        var assistantMessage = AIAssistantMessages(
+          AIAssistantMessages(lastMessages),
+        );
+        assistantMessage.typingUser = null;
+        emit(assistantMessage);
         break;
       default:
         _emitMessage(message.content ?? "", "text");
@@ -230,8 +283,9 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
 
   void _emitMessage(String message, String responseType) async {
     lastMessages.addCustomResponse([message], responseType);
-    var assistantMessage =
-        AIAssistantMessages(AIAssistantMessages(lastMessages));
+    var assistantMessage = AIAssistantMessages(
+      AIAssistantMessages(lastMessages),
+    );
     assistantMessage.typingUser =
         responseType == "reasoning" ? AIAssistantMessages.aiUser : null;
     emit(assistantMessage);
@@ -278,5 +332,44 @@ class AIAssistantCubit extends Cubit<AIAssistantState> {
     emit(lastMessages);
 
     await aiAssistant?.confirmToolAction(actionId, allowed);
+  }
+
+  /// Handle user's data review decision
+  /// [reviewedData] is the potentially edited data, or null if user declined
+  Future<void> confirmDataReview(int actionId, String? reviewedData) async {
+    // Update UI to show decision
+    for (var msg in lastMessages.messages) {
+      if (msg is msg_types.CustomMessage) {
+        var metadata = msg.metadata;
+        if (metadata == null) continue;
+        var type = metadata['type'];
+        if (type != 'data_review') continue;
+        var response = metadata['response'];
+        if (response is List && response.isNotEmpty) {
+          var payload = response.first;
+          if (payload is Map<String, dynamic>) {
+            if (payload['actionId'] == actionId) {
+              payload['decision'] =
+                  reviewedData != null ? 'approved' : 'declined';
+              if (reviewedData != null) {
+                payload['reviewedData'] = reviewedData;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    lastMessages = AIAssistantMessages(lastMessages);
+    emit(lastMessages);
+
+    // Forward to AI assistant
+    if (aiAssistant is ChatGptAssistant) {
+      await (aiAssistant as ChatGptAssistant).confirmDataReview(
+        actionId,
+        reviewedData,
+      );
+    }
   }
 }

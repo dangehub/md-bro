@@ -1,5 +1,20 @@
 import 'package:logger/logger.dart';
-import 'package:tuple/tuple.dart';
+
+/// Definition of a tool that can be called by AI
+class ToolDefinition {
+  final String description;
+  final bool requiresConfirmation;
+  final bool
+  requiresReview; // New: requires user review before sending data to AI
+  final Function function;
+
+  ToolDefinition({
+    required this.description,
+    required this.function,
+    this.requiresConfirmation = false,
+    this.requiresReview = false,
+  });
+}
 
 class ToolsRegistry {
   // Private constructor
@@ -17,23 +32,34 @@ class ToolsRegistry {
 
   ToolsRegistry();
 
-  // Private map to store functions: (description, confirm, function)
-  final Map<String, Tuple3<String, bool, Function>> _functions = {};
+  // Private map to store functions
+  final Map<String, ToolDefinition> _functions = {};
 
   // Registers a function with a given name
-  void registerFunction(String name, String description, Function function,
-      {bool confirm = false}) {
-    _functions[name] = Tuple3(description, confirm, function);
+  void registerFunction(
+    String name,
+    String description,
+    Function function, {
+    bool confirm = false,
+    bool review = false,
+  }) {
+    _functions[name] = ToolDefinition(
+      description: description,
+      function: function,
+      requiresConfirmation: confirm,
+      requiresReview: review,
+    );
     Logger().i(
-        'Function "${name}" registered with description: ${description}, confirm: ${confirm}');
+      'Function "$name" registered with description: $description, confirm: $confirm, review: $review',
+    );
   }
 
   List<String> getFunctionInfos() {
     var functions = _functions.entries.map((entry) {
       return '''{
 "name":"${entry.key}",
-"description": "${entry.value.item1}",
-"confirm": ${entry.value.item2}
+"description": "${entry.value.description}",
+"confirm": ${entry.value.requiresConfirmation}
 }''';
     }).toList();
 
@@ -45,20 +71,24 @@ class ToolsRegistry {
   }
 
   bool requiresConfirmation(String name) {
-    return _functions[name]?.item2 ?? false;
+    return _functions[name]?.requiresConfirmation ?? false;
+  }
+
+  bool requiresReview(String name) {
+    return _functions[name]?.requiresReview ?? false;
   }
 
   String? getDescription(String name) {
-    return _functions[name]?.item1;
+    return _functions[name]?.description;
   }
 
   // Retrieves the description of a function by its name
   // Calls a function by its name with optional parameters
   Future<String> callFunction(String name, List<dynamic> params) async {
     if (_functions.containsKey(name)) {
-      return await Function.apply(_functions[name]!.item3, params);
+      return await Function.apply(_functions[name]!.function, params);
     } else {
-      throw Exception('Function "${name}" is not registered.');
+      throw Exception('Function "$name" is not registered.');
     }
   }
 }

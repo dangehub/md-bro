@@ -17,6 +17,27 @@ import 'package:obsi/src/screens/settings/settings_service.dart';
 import 'package:path/path.dart' as p;
 part 'inbox_tasks_state.dart';
 
+/// Represents a pending task status change that can be undone
+class PendingStatusChange {
+  final Task task;
+  final TaskStatus oldStatus;
+  final TaskStatus newStatus;
+  final DateTime? oldDoneTime;
+  final Timer timer;
+
+  PendingStatusChange({
+    required this.task,
+    required this.oldStatus,
+    required this.newStatus,
+    required this.oldDoneTime,
+    required this.timer,
+  });
+
+  void cancel() {
+    timer.cancel();
+  }
+}
+
 class InboxTasksCubit extends Cubit<InboxTasksState> {
   final TaskManager _taskManager;
   List<Task> _tasks = []; // Stores all tasks loaded from TaskManager
@@ -27,6 +48,10 @@ class InboxTasksCubit extends Cubit<InboxTasksState> {
   final Set<String> _excludedTags = <String>{};
   int _taskDoneCount = 0;
   int _taskCount = 0;
+
+  // Undo feature: pending status changes
+  final Map<String, PendingStatusChange> _pendingChanges = {};
+  Timer? _widgetUpdateTimer;
 
   // Filter Lists
   List<FilterList> availableFilters = [
@@ -290,9 +315,18 @@ class InboxTasksCubit extends Cubit<InboxTasksState> {
 
     // Always schedule notifications for all tasks (now handling all tasks in manager)
     _scheduleNotifications(_taskManager.tasks);
-    if (Platform.isAndroid) {
-      HomeWidgetHandler.updateWidget(_taskManager.tasks);
-    }
+
+    // Delay widget update
+    // If we have pending undo changes, wait 6 seconds (to cover the 5s undo window + buffer)
+    // Otherwise update quickly (500ms debounce)
+    _widgetUpdateTimer?.cancel();
+    int delaySeconds = _pendingChanges.isNotEmpty ? 6 : 1;
+
+    _widgetUpdateTimer = Timer(Duration(seconds: delaySeconds), () {
+      if (Platform.isAndroid) {
+        HomeWidgetHandler.updateWidget(_taskManager.tasks);
+      }
+    });
 
     // Load ALL tasks
     // _taskManager.tasks getter returns a list copy.
@@ -300,6 +334,129 @@ class InboxTasksCubit extends Cubit<InboxTasksState> {
     _applySearchFilter();
   }
 
+  /// Change task status with 5-second undo window
+  /// Returns the taskId that can be used to undo
+  String changeTaskStatusWithUndo(Task task, TaskStatus newStatus) {
+    final taskId = task.taskSource?.id.toString() ??
+        task.description ??
+        DateTime.now().toString();
+    final oldStatus = task.status;
+    final oldDoneTime = task.done;
+
+    // Cancel any existing pending change for this task
+    if (_pendingChanges.containsKey(taskId)) {
+      _pendingChanges[taskId]!.cancel();
+      _pendingChanges.remove(taskId);
+    }
+
+    // 1. Optimistic UI update (Defered!)
+    // We DO NOT update task.status here to prevent it from jumping in the list
+    // if the list is sorted/grouped by status.
+    // The UI (TaskCard) must handle the visual state based on PendingStatusChange.
+
+    // Refresh UI to show pending state
+    _applySearchFilter();
+
+    // 2. Create delayed commit timer
+    final timer = Timer(const Duration(seconds: 5), () {
+      _commitStatusChange(taskId);
+    });
+
+    // 3. Store pending change
+    _pendingChanges[taskId] = PendingStatusChange(
+      task: task,
+      oldStatus: oldStatus,
+      newStatus: newStatus,
+      oldDoneTime: oldDoneTime,
+      timer: timer,
+    );
+
+    // 4. Get filtered tasks for state
+    var filteredTasks = _getFilteredTasks();
+
+    // 5. Emit undo available state
+    emit(InboxTasksUndoAvailable(
+      tasks: filteredTasks,
+      taskId: taskId,
+      taskDescription: task.description ?? '',
+      wasCompleted: newStatus == TaskStatus.done,
+    ));
+
+    return taskId;
+  }
+
+  /// Undo a pending task status change
+  void undoTaskStatusChange(String taskId) {
+    final pending = _pendingChanges.remove(taskId);
+    if (pending != null) {
+      pending.cancel();
+      // No need to revert task.status as it wasn't changed yet!
+      _applySearchFilter();
+      Logger().i('Task status change undone for: ${pending.task.description}');
+    }
+  }
+
+  /// Commit a pending status change to storage
+  void _commitStatusChange(String taskId) {
+    final pending = _pendingChanges.remove(taskId);
+    if (pending != null) {
+      // Now we actually update the task
+      pending.task.status = pending.newStatus;
+      if (pending.newStatus == TaskStatus.done) {
+        pending.task.done = DateTime.now();
+      } else {
+        pending.task.done = null;
+      }
+
+      // Handle completion actions
+      if (pending.newStatus == TaskStatus.done) {
+        switch (currentFilterList.completionAction) {
+          case TaskCompletionAction.delete:
+            _taskManager.deleteTask(pending.task);
+            return;
+          case TaskCompletionAction.archive:
+            _taskManager.archiveTask(pending.task);
+            return;
+          case TaskCompletionAction.keep:
+          default:
+            break;
+        }
+      }
+
+      // Save to storage
+      _taskManager.setStatus(pending.task, pending.newStatus);
+      Logger().i(
+          'Task status committed: ${pending.task.description} -> ${pending.newStatus}');
+
+      // Refresh UI to reflect final state (might move task now)
+      _applySearchFilter();
+
+      // If we are on Android, update widget now
+      if (Platform.isAndroid) {
+        HomeWidgetHandler.updateWidget(_taskManager.tasks);
+      }
+    }
+  }
+
+  /// Get currently filtered tasks (helper for state emission)
+  List<Task> _getFilteredTasks() {
+    return _tasks.where((task) {
+      // Check if task is pending undo
+      final taskId = task.taskSource?.id.toString() ?? task.description ?? '';
+      if (_pendingChanges.containsKey(taskId)) {
+        // Always include pending undo tasks regardless of filter status (e.g. done status)
+        // But still respect search query
+        var description = task.description ?? "";
+        return description.toLowerCase().contains(searchQuery.toLowerCase());
+      }
+
+      if (!currentFilterList.matches(task)) return false;
+      var description = task.description ?? "";
+      return description.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
+  }
+
+  /// Legacy method - immediate status change without undo
   Future changeTaskStatus(Task task, TaskStatus status) async {
     if (status == TaskStatus.done) {
       task.done = DateTime.now();
