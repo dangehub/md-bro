@@ -8,6 +8,7 @@ import 'package:obsi/src/core/storage/storage_interfaces.dart';
 import 'package:obsi/src/core/tasks/task_manager.dart';
 import 'package:obsi/src/core/subscription/subscription_manager.dart';
 import 'package:obsi/src/core/intent_service.dart';
+import 'package:obsi/src/core/system_widget.dart';
 
 import 'app.dart';
 import 'src/screens/settings/settings_controller.dart';
@@ -18,6 +19,10 @@ void main() async {
   if (Platform.isIOS) {
     await HomeWidget.setAppGroupId('group.com.vankir.vaultmate');
   }
+  // Register background callback for widget actions
+  await HomeWidget.registerBackgroundCallback(
+      HomeWidgetHandler.homeWidgetHandler);
+
   final settingsController =
       SettingsController.getInstance(settingsService: SettingsService());
   var storage = TasksFileStorage.getInstance();

@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:obsi/src/core/notification_manager.dart';
 import 'package:obsi/src/core/storage/ios_tasks_file_storage.dart';
 import 'package:obsi/src/core/storage/storage_interfaces.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:obsi/src/core/subscription/subscription_manager.dart';
 import 'dart:io';
 import 'settings_service.dart';
@@ -12,7 +13,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:convert';
 import 'package:obsi/src/core/filter_list.dart';
-import 'package:obsi/src/core/task_filter.dart';
 
 class SettingsController with ChangeNotifier {
   static SettingsController? _instance;
@@ -386,6 +386,18 @@ class SettingsController with ChangeNotifier {
     _memosWidgetSortAscending = ascending;
     notifyListeners();
     await _settingsService.updateMemosWidgetSortAscending(ascending);
+
+    // Update widget data
+    await HomeWidget.saveWidgetData<String>(
+        'notes_widget_sort_ascending', ascending.toString());
+    await HomeWidget.updateWidget(
+      name: 'CombinedWidgetReceiver',
+      iOSName: 'HomeWidget',
+    );
+    await HomeWidget.updateWidget(
+      name: 'NotesWidgetReceiver',
+      iOSName: 'HomeWidget',
+    );
   }
 
   //Future<void> updateNotificationTime(DateTime? newNotifTime) async {

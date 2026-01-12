@@ -81,7 +81,6 @@ class CombinedWidget : GlanceAppWidget() {
             updateAppWidgetState(context, HomeWidgetGlanceStateDefinition(), glanceId) { state: HomeWidgetGlanceState ->
                 val prefs = state.preferences
                 val vaultDir = prefs.getString(NotesWidget.NOTES_VAULT_DIR_KEY, null)
-                
                 if (vaultDir.isNullOrEmpty()) {
                     Log.d(TAG, "No vault directory configured, skipping memo refresh")
                     return@updateAppWidgetState state
@@ -132,9 +131,23 @@ class CombinedWidget : GlanceAppWidget() {
         val memos = if (!notesJson.isNullOrEmpty() && !vaultDir.isNullOrEmpty()) {
             try {
                 val notes = parseNotes(notesJson, vaultDir)
-                if (notes.isNotEmpty()) {
-                    val content = readNoteContent(vaultDir, notes.first().fileName)
-                    if (content != null) parseMemos(content) else emptyList()
+                if (notes.isNotEmpty() && !vaultDir.isNullOrEmpty()) {
+                    val firstNote = notes.first()
+                    val content = readNoteContent(vaultDir, firstNote.fileName)
+                    if (content != null) {
+                        var parsed = parseMemos(content)
+                        val sortAscendingStr = prefs.getString("notes_widget_sort_ascending", "false")
+                        val sortAscending = sortAscendingStr?.toBoolean() ?: false
+                        
+                        parsed = if (sortAscending) {
+                            parsed.sortedBy { it.time }
+                        } else {
+                            parsed.sortedByDescending { it.time }
+                        }
+                        parsed
+                    } else {
+                        emptyList()
+                    }
                 } else {
                     emptyList()
                 }

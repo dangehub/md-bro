@@ -11,6 +11,7 @@ import 'package:obsi/src/core/tasks/task_manager.dart';
 import 'package:obsi/src/screens/settings/settings_controller.dart';
 import 'package:obsi/src/screens/settings/settings_service.dart';
 
+@pragma("vm:entry-point")
 class HomeWidgetHandler {
   @pragma("vm:entry-point")
   static Future<void> homeWidgetHandler(Uri? uri) async {
@@ -75,7 +76,7 @@ class HomeWidgetHandler {
 
     TaskManager taskManager = TaskManager(
       ChangedFilesStorage(AndroidTasksFileStorage()),
-      todoOnly: false,
+      todoOnly: true,
     );
 
     taskManager.dateTemplate = settings.dateTemplate;
