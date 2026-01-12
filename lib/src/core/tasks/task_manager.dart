@@ -10,6 +10,8 @@ import 'package:obsi/src/core/tasks/reccurent_task.dart';
 import 'package:obsi/src/core/tasks/task.dart';
 import 'package:obsi/src/core/tasks/savers/task_saver.dart';
 import 'package:obsi/src/core/tasks/task_worker.dart';
+import 'package:obsi/src/core/storage/changed_files_storage.dart';
+import 'package:obsi/src/core/tasks/tasks_cache.dart';
 import 'package:tuple/tuple.dart';
 
 enum TaskManagerStatus { none, loading, loaded }
@@ -58,6 +60,7 @@ class TaskManager with ChangeNotifier {
   TasksFileStorage storage;
   String _vaultName = "";
   bool includeDueTasksInToday = true;
+  final TasksCache _tasksCache = TasksCache();
 
   // String get vaultName {
   //   if (_vaultName.isEmpty) {
@@ -117,10 +120,14 @@ class TaskManager with ChangeNotifier {
     return state;
   }
 
+  /// [cacheOnly]: If true, only loads from TasksCache and skips file scanning.
+  /// Used for "Quick Add" scenarios where valid tag data is needed but full scan is unnecessary.
   Future loadTasks(String path,
-      {String taskFilter = "", String taskNotePath = ""}) async {
+      {String taskFilter = "",
+      String taskNotePath = "",
+      bool cacheOnly = false}) async {
     status = TaskManagerStatus.loading;
-    Logger().i("loadTasks started");
+    Logger().i("loadTasks started (cacheOnly: $cacheOnly)");
     final startTime = DateTime.now();
     try {
       lastError = null;
@@ -129,50 +136,102 @@ class TaskManager with ChangeNotifier {
       if (_path != path || _taskFilter != taskFilter) {
         _vaultName = "";
         _taskFilter = taskFilter;
-        removeCache = true;
+        // Only invalidate cache if we are switching from a VALID path (not startup)
+        if (_path.isNotEmpty) {
+          removeCache = true;
+        }
         _allTags = [];
       }
 
       _path = path;
 
-      List<TasksFile> onlyFiles = await storage.getAllFiles(path);
+      // [Optimization] Load from persistent cache if tasks are empty (cold start) or cacheOnly requested
+      if ((_tasks.isEmpty && !removeCache) || cacheOnly) {
+        final cachedTasks = await _tasksCache.loadTasks();
+        if (cachedTasks.isNotEmpty) {
+          _tasks = cachedTasks;
+          // Rebuild tags from cached tasks
+          final Set<String> tags = {};
+          for (var t in _tasks) {
+            tags.addAll(t.tags);
+          }
+          _allTags = tags.toList()..sort();
+          notifyListeners(); // Immediate UI update
+          Logger().i("Loaded ${_tasks.length} tasks from cache");
+        }
+      }
 
-      if (onlyFiles.isEmpty) {
-        Logger().i("No changes in files.");
+      // If cacheOnly is requested, stop here.
+      if (cacheOnly) {
+        Logger().i("Skipping file scan (cacheOnly mode)");
         return;
       }
 
-      // Remove tasks from _tasks which contains file source with the filename returned in onlyFiles
-      _tasks.removeWhere((task) =>
-          onlyFiles.any((file) => task.taskSource!.fileName == file.path));
-
-      // Process tasks (single-line switch: iOS = direct, others = isolate)
-      final result =
-          await (Platform.isIOS ? _processTasksDirect : _processTasksInIsolate)(
-        onlyFiles,
-        taskFilter,
-        todoOnly,
-        forDateOnly,
-        taskNotePath,
-      );
-
-      if (result.error != null) {
-        lastError = result.error;
-        Logger().e("Error occurred during task processing in isolate.",
-            error: result.error);
-        Logger().e("Error occurred during task processing in isolate.",
-            error: result.error);
-      } else {
-        // Update tags from isolate result
-        final Set<String> allTagsSet = Set<String>.from(_allTags);
-        allTagsSet.addAll(result.allTags);
-        _allTags = allTagsSet.toList()..sort();
-
-        if (removeCache) {
-          _tasks = result.tasks;
-        } else {
-          _tasks.addAll(result.tasks);
+      // [Optimization] Safety Check: If we have NO tasks in memory (e.g. first run after update, or cache cleared),
+      // we CANNOT rely on incremental updates. We must force a full scan.
+      // Otherwise, if FileTimestampCache exists but TasksCache is empty, we'd only load changed files
+      // and lose all other existing tasks.
+      if (_tasks.isEmpty && !removeCache) {
+        Logger().i(
+            "Memory empty and Cache failed/empty. Forcing full storage scan.");
+        if (storage is ChangedFilesStorage) {
+          await (storage as ChangedFilesStorage).clearCache();
         }
+      }
+
+      List<TasksFile> onlyFiles = await storage.getAllFiles(path);
+
+      if (onlyFiles.isEmpty) {
+        // [Optimization] Handle cache mismatch: Storage says no changes, but we have no tasks
+        // (This block might be redundant with the pre-check above, but keeps safety for edge cases)
+        if (_tasks.isEmpty) {
+          Logger().w(
+              "Cache mismatch: No changed files but no tasks in memory. Forcing rescan.");
+          if (storage is ChangedFilesStorage) {
+            await (storage as ChangedFilesStorage).clearCache();
+            onlyFiles = await storage.getAllFiles(path);
+          }
+        } else {
+          Logger().i("No changes in files.");
+          return;
+        }
+      }
+
+      if (onlyFiles.isNotEmpty) {
+        // Remove tasks from _tasks which contains file source with the filename returned in onlyFiles
+        _tasks.removeWhere((task) =>
+            onlyFiles.any((file) => task.taskSource!.fileName == file.path));
+
+        // Process tasks (single-line switch: iOS = direct, others = isolate)
+        final result = await (Platform.isIOS
+            ? _processTasksDirect
+            : _processTasksInIsolate)(
+          onlyFiles,
+          taskFilter,
+          todoOnly,
+          forDateOnly,
+          taskNotePath,
+        );
+
+        if (result.error != null) {
+          lastError = result.error;
+          Logger().e("Error occurred during task processing in isolate.",
+              error: result.error);
+        } else {
+          // Update tags from isolate result
+          final Set<String> allTagsSet = Set<String>.from(_allTags);
+          allTagsSet.addAll(result.allTags);
+          _allTags = allTagsSet.toList()..sort();
+
+          if (removeCache) {
+            _tasks = result.tasks;
+          } else {
+            _tasks.addAll(result.tasks);
+          }
+        }
+
+        // [Optimization] Save updated task list to cache
+        await _tasksCache.saveTasks(_tasks);
       }
     } catch (e) {
       lastError = e;
@@ -389,6 +448,27 @@ class TaskManager with ChangeNotifier {
 
       _addFilteredTasks(_tasks, updatedTasks, todoOnly, forDateOnly,
           position: indexOfFirstTaskFromFile);
+
+      // [Optimization] Update Persistent Caches Immediately
+      // 1. Save Tasks Cache
+      await _tasksCache.saveTasks(_tasks);
+
+      // 2. Update File Timestamp Cache
+      // We need the file path.
+      if (storage is ChangedFilesStorage) {
+        try {
+          final file = File(fileName);
+          if (await file.exists()) {
+            final lastMod = await file.lastModified();
+            await (storage as ChangedFilesStorage)
+                .updateFileTimestamp(fileName, lastMod);
+            Logger().d("Updated timestamp cache for $fileName");
+          }
+        } catch (e) {
+          Logger()
+              .w("Failed to update timestamp cache for saved file", error: e);
+        }
+      }
     }
     notifyListeners();
   }

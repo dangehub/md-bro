@@ -37,7 +37,7 @@ void main() async {
   await subscriptionManager.initialize();
 
   // Initialize intent service
-  await IntentService.instance.initialize();
+  String? initialAction = await IntentService.instance.initialize();
 
   if (!await notificationManager.notificationPermissionGranted()) {
     await notificationManager.requestExactAlarmPermission();
@@ -52,8 +52,10 @@ void main() async {
 
   if (settingsController.vaultDirectory != null &&
       settingsController.vaultDirectory != '') {
+    // If opening for "Add Task", use cacheOnly mode to skip file scan
+    bool cacheOnly = initialAction == 'add_task';
     taskManager.loadTasks(settingsController.vaultDirectory!,
-        taskFilter: settingsController.globalTaskFilter);
+        taskFilter: settingsController.globalTaskFilter, cacheOnly: cacheOnly);
   }
 
   runApp(App(

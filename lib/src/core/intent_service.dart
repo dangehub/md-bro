@@ -15,18 +15,25 @@ class IntentService {
     return _instance!;
   }
 
+  String? _initialAction;
+
   /// Initialize the intent service and set up the method call handler
-  Future<void> initialize() async {
+  Future<String?> initialize() async {
     _channel.setMethodCallHandler(_handleMethodCall);
 
     // Check if the app was started with an intent
     await _checkInitialIntent();
+    return _initialAction;
   }
 
   /// Set the callback for when an intent is received
   void setIntentHandler(
       Function(String action, Map<String, dynamic>? extras) handler) {
     _onIntentReceived = handler;
+    // If we have an initial action pending, fire it now?
+    // Usually App calls this in initState.
+    // We can rely on _checkInitialIntent firing it or manual retrieval.
+    // Current implementation fires callback. We keep that for compatibility.
   }
 
   /// Handle method calls from the Android side
@@ -53,8 +60,9 @@ class IntentService {
         final Map<String, dynamic>? extras =
             intentData['extras']?.cast<String, dynamic>();
         if (action.isNotEmpty) {
-          // Delay the callback to ensure the app is fully initialized
-          Future.delayed(const Duration(milliseconds: 500), () {
+          _initialAction = action;
+          // Delay the callback to ensure the app is fully initialized when using callback
+          Future.delayed(const Duration(milliseconds: 100), () {
             _onIntentReceived?.call(action, extras);
           });
         }

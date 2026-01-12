@@ -231,6 +231,41 @@ class Task implements Comparable<Task> {
       'recurrenceRule': _recurrenceRule,
       'filePath': taskSource?.fileName,
       'fileOffset': taskSource?.offset.toString(),
+      'fileNumber': taskSource?.fileNumber.toString(),
+      'length': taskSource?.length.toString(),
     };
+  }
+
+  factory Task.fromJson(Map<String, dynamic> json) {
+    var task = Task(
+      json['description'],
+      status: TaskStatus.values.firstWhere((e) => e.name == json['status'],
+          orElse: () => TaskStatus.todo),
+      priority: TaskPriority.values.firstWhere(
+          (e) => e.name == json['priority'],
+          orElse: () => TaskPriority.normal),
+      created: json['created'] != null ? DateTime.parse(json['created']) : null,
+      done: json['done'] != null ? DateTime.parse(json['done']) : null,
+      cancelled:
+          json['cancelled'] != null ? DateTime.parse(json['cancelled']) : null,
+      due: json['due'] != null ? DateTime.parse(json['due']) : null,
+      start: json['start'] != null ? DateTime.parse(json['start']) : null,
+      scheduled:
+          json['scheduled'] != null ? DateTime.parse(json['scheduled']) : null,
+      scheduledTime: json['scheduledTime'] ?? false,
+      isScheduledDateInferred: json['isScheduledDateInferred'] ?? false,
+      recurranceRule: json['recurrenceRule'],
+      tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
+    );
+
+    if (json['filePath'] != null) {
+      task.taskSource = TaskSource(
+        int.tryParse(json['fileNumber'] ?? '0') ?? 0,
+        json['filePath'],
+        int.tryParse(json['fileOffset'] ?? '0') ?? 0,
+        int.tryParse(json['length'] ?? '0') ?? 0,
+      );
+    }
+    return task;
   }
 }
