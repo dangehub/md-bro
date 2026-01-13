@@ -13,6 +13,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:convert';
 import 'package:obsi/src/core/filter_list.dart';
+import 'package:obsi/src/core/localization/locale_service.dart';
+import 'package:obsi/src/core/localization/custom_language.dart';
 
 class SettingsController with ChangeNotifier {
   static SettingsController? _instance;
@@ -230,6 +232,12 @@ class SettingsController with ChangeNotifier {
   bool get memosPathIsDynamic => _memosPathIsDynamic;
   bool get memosWidgetSortAscending => _memosWidgetSortAscending;
 
+  // Locale settings
+  Locale get locale => LocaleService.instance.currentLocale;
+  List<CustomLanguage> get customLanguages =>
+      LocaleService.instance.customLanguages;
+  List<Locale> get supportedLocales => LocaleService.instance.supportedLocales;
+
   Future<void> loadSettings() async {
     _themeMode = await _settingsService.themeMode();
     _vaultDirectory = await _settingsService.vaultDirectory();
@@ -356,6 +364,10 @@ class SettingsController with ChangeNotifier {
     _memosWidgetSortAscending =
         await _settingsService.memosWidgetSortAscending();
 
+    // Initialize LocaleService
+    await LocaleService.instance.initialize();
+    LocaleService.instance.addListener(notifyListeners);
+
     notifyListeners();
   }
 
@@ -398,6 +410,18 @@ class SettingsController with ChangeNotifier {
       name: 'NotesWidgetReceiver',
       iOSName: 'HomeWidget',
     );
+  }
+
+  Future<void> updateLocale(Locale locale) async {
+    await LocaleService.instance.setLocale(locale);
+  }
+
+  Future<void> importDictionary(String filePath) async {
+    await LocaleService.instance.importDictionary(filePath);
+  }
+
+  Future<void> removeDictionary(String localeCode) async {
+    await LocaleService.instance.removeDictionary(localeCode);
   }
 
   //Future<void> updateNotificationTime(DateTime? newNotifTime) async {

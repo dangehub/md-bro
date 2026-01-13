@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:obsi/src/localization/app_localizations.dart';
+import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:obsi/src/screens/introduction/onboarding.dart';
 import 'package:obsi/src/core/tasks/task_manager.dart';
@@ -18,6 +18,7 @@ import 'src/screens/init/cubit/init_cubit.dart';
 import 'src/screens/init/init.dart';
 import 'src/screens/notes_widget_config/notes_widget_config.dart';
 import 'src/screens/notes_widget_config/cubit/notes_widget_config_cubit.dart';
+import 'package:obsi/src/core/localization/custom_localizations.dart';
 
 class App extends StatefulWidget {
   final SettingsController settingsController;
@@ -188,15 +189,15 @@ class _AppState extends State<App> {
               title: 'Obsi',
               debugShowCheckedModeBanner: false,
               restorationScopeId: 'app',
-              localizationsDelegates: const [
+              localizationsDelegates: [
+                const CustomLocalizationsDelegate(),
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
               ],
-              supportedLocales: const [
-                Locale('en', ''), // English, no country code
-              ],
+              supportedLocales: widget.settingsController.supportedLocales,
+              locale: widget.settingsController.locale,
 
               // Use AppLocalizations to configure the correct application title
               // depending on the user's locale.

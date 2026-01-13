@@ -5,6 +5,9 @@ import 'package:obsi/src/core/utils.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
+import 'package:file_picker/file_picker.dart';
+
 import 'settings_controller.dart';
 import 'settings_service.dart';
 
@@ -185,12 +188,78 @@ class _SettingsViewState extends State<SettingsView> {
       body: SafeArea(
         bottom: true,
         child: ListView(children: [
+          // 0. Language Settings
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ExpansionTile(
+              title: Text(AppLocalizations.of(context)!.language,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              initiallyExpanded: false,
+              tilePadding: EdgeInsets.zero,
+              children: [
+                // Language Dropdown
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: Text(AppLocalizations.of(context)!.language)),
+                      DropdownButton<Locale>(
+                        value: widget.controller.locale,
+                        items: widget.controller.supportedLocales.map((locale) {
+                          return DropdownMenuItem(
+                            value: locale,
+                            child: Text(_getLocaleDisplayName(locale)),
+                          );
+                        }).toList(),
+                        onChanged: (Locale? newLocale) {
+                          if (newLocale != null) {
+                            widget.controller.updateLocale(newLocale);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+
+                // Import Dictionary
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(AppLocalizations.of(context)!.importDictionary),
+                  trailing: const Icon(Icons.upload_file),
+                  onTap: _importDictionary,
+                ),
+
+                // Manage Dictionaries
+                if (widget.controller.customLanguages.isNotEmpty) ...[
+                  const Divider(),
+                  Text(AppLocalizations.of(context)!.manageDictionaries,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.grey)),
+                  ...widget.controller.customLanguages.map((lang) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(lang.name),
+                        subtitle: Text(lang.locale),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _removeDictionary(lang.locale),
+                        ),
+                      )),
+                ]
+              ],
+            ),
+          ),
+          const Divider(),
+
           // 1. General Settings
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ExpansionTile(
-              title: const Text("General",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(AppLocalizations.of(context)!.general,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               initiallyExpanded: true,
               tilePadding: EdgeInsets.zero,
               children: [
@@ -198,20 +267,20 @@ class _SettingsViewState extends State<SettingsView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                        "Folder in the Obsidian vault containing tasks:"),
+                    Text(AppLocalizations.of(context)!.vaultFolderPrompt),
                     const SizedBox(height: 4),
                     Row(
                       children: [
                         Expanded(
                           child: Text(
                             widget.controller.vaultDirectory ??
-                                "<Please choose the folder>",
+                                AppLocalizations.of(context)!
+                                    .pleaseChooseFolder,
                             style: TextStyle(color: Colors.grey[700]),
                           ),
                         ),
                         ElevatedButton(
-                            child: const Text("Select"),
+                            child: Text(AppLocalizations.of(context)!.select),
                             onPressed: () async {
                               var vaultDirectory =
                                   await SettingsController.selectVaultDirectory(
@@ -228,15 +297,16 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
                 const SizedBox(height: 16),
                 Column(children: [
-                  const Align(
+                  Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Show on-boarding screen:")),
+                      child:
+                          Text(AppLocalizations.of(context)!.showOnboarding)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          "Enable to show the on-boarding screen when the app starts",
+                          AppLocalizations.of(context)!.showOnboardingDesc,
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
@@ -255,9 +325,10 @@ class _SettingsViewState extends State<SettingsView> {
                 ]),
                 const SizedBox(height: 16),
                 Column(children: [
-                  const Align(
+                  Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Daily reminder to review tasks:")),
+                      child: Text(
+                          AppLocalizations.of(context)!.dailyReminderTasks)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -270,7 +341,7 @@ class _SettingsViewState extends State<SettingsView> {
                                 style: const TextStyle(fontSize: 16),
                               )
                             : Text(
-                                'Not set',
+                                AppLocalizations.of(context)!.notSet,
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -300,9 +371,10 @@ class _SettingsViewState extends State<SettingsView> {
                 ]),
                 const SizedBox(height: 16),
                 Column(children: [
-                  const Align(
+                  Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Daily reminder to review completed tasks:")),
+                      child: Text(AppLocalizations.of(context)!
+                          .dailyReminderCompleted)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -315,7 +387,7 @@ class _SettingsViewState extends State<SettingsView> {
                                 style: const TextStyle(fontSize: 16),
                               )
                             : Text(
-                                'Not set',
+                                AppLocalizations.of(context)!.notSet,
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -359,10 +431,9 @@ class _SettingsViewState extends State<SettingsView> {
               children: [
                 const SizedBox(height: 8),
                 Column(children: [
-                  const Align(
+                  Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                          "File name for adding new tasks (located at the path below):")),
+                      child: Text(AppLocalizations.of(context)!.tasksFileName)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _tasksFileNameController,
@@ -377,14 +448,15 @@ class _SettingsViewState extends State<SettingsView> {
                 ]),
                 const SizedBox(height: 16),
                 Column(children: [
-                  const Align(
+                  Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Global Task Filter: ")),
+                      child:
+                          Text(AppLocalizations.of(context)!.globalTaskFilter)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _globalTaskFilterController,
-                    decoration: const InputDecoration(
-                      hintText: "Enter a global task filter, e.g. #task",
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.enterGlobalFilter,
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
@@ -402,16 +474,16 @@ class _SettingsViewState extends State<SettingsView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ExpansionTile(
-              title: const Text("Memos",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(AppLocalizations.of(context)!.memos,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               tilePadding: EdgeInsets.zero,
               children: [
                 const SizedBox(height: 8),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text("Memos Path:"),
+                  Text(AppLocalizations.of(context)!.memosPath),
                   const SizedBox(height: 4),
                   Text(
-                    "Static path (e.g., memos.md) or dynamic path with date variables (e.g., {{YYYY}}/{{YYYY-MM-DD}}.md)",
+                    AppLocalizations.of(context)!.memosPathDesc,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -437,10 +509,10 @@ class _SettingsViewState extends State<SettingsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Dynamic Path:"),
+                          Text(AppLocalizations.of(context)!.dynamicPath),
                           const SizedBox(height: 4),
                           Text(
-                            "Enable if path contains date variables like {{YYYY-MM-DD}}",
+                            AppLocalizations.of(context)!.dynamicPathDesc,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -465,10 +537,10 @@ class _SettingsViewState extends State<SettingsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Widget Sort Order:"),
+                          Text(AppLocalizations.of(context)!.widgetSortOrder),
                           const SizedBox(height: 4),
                           Text(
-                            "Ascending shows oldest memos first; Descending shows newest first",
+                            AppLocalizations.of(context)!.widgetSortOrderDesc,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -478,14 +550,14 @@ class _SettingsViewState extends State<SettingsView> {
                       ),
                     ),
                     SegmentedButton<bool>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: true,
-                          label: Text("Asc"),
+                          label: Text(AppLocalizations.of(context)!.asc),
                         ),
                         ButtonSegment(
                           value: false,
-                          label: Text("Desc"),
+                          label: Text(AppLocalizations.of(context)!.desc),
                         ),
                       ],
                       selected: {widget.controller.memosWidgetSortAscending},
@@ -498,10 +570,10 @@ class _SettingsViewState extends State<SettingsView> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text("附件目录 (Attachment Directory):"),
+                Text(AppLocalizations.of(context)!.memosAttachmentDir),
                 const SizedBox(height: 4),
                 Text(
-                  "相对于 Vault 的路径，支持日期变量。例如: assets 或 {{YYYY}}/assets",
+                  AppLocalizations.of(context)!.memosAttachmentDirDesc,
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -510,8 +582,9 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: _memosAttachmentDirController,
-                  decoration: const InputDecoration(
-                    hintText: "例如: assets 或 {{YYYY}}/assets",
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizations.of(context)!.enterMemosAttachmentDir,
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
@@ -521,13 +594,13 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
-                const Text("Image Compression",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(AppLocalizations.of(context)!.imageCompression,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text("Enable Compression"),
+                  title: Text(AppLocalizations.of(context)!.enableCompression),
                   subtitle:
-                      const Text("Compress images before saving to vault"),
+                      Text(AppLocalizations.of(context)!.enableCompressionDesc),
                   value: _imageCompressionEnabled,
                   onChanged: _updateImageCompressionEnabled,
                 ),
@@ -535,15 +608,17 @@ class _SettingsViewState extends State<SettingsView> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _imageCompressionFormat,
-                    decoration: const InputDecoration(
-                      labelText: "Format",
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.format,
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
                     items: const [
                       DropdownMenuItem(
-                          value: 'webp', child: Text('WebP (Recommended)')),
+                          value: 'webp',
+                          child: Text(
+                              'WebP (Recommended)')), // Keep WebP as tech term?
                       DropdownMenuItem(value: 'jpeg', child: Text('JPEG')),
                       DropdownMenuItem(value: 'png', child: Text('PNG')),
                     ],
@@ -554,7 +629,7 @@ class _SettingsViewState extends State<SettingsView> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Text("Quality: "),
+                      Text("${AppLocalizations.of(context)!.quality} "),
                       Expanded(
                         child: Slider(
                           value: _imageCompressionQuality.toDouble(),
@@ -579,15 +654,15 @@ class _SettingsViewState extends State<SettingsView> {
                 ],
                 const SizedBox(height: 16),
                 const Divider(),
-                const Text("Microblog Publishing",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(AppLocalizations.of(context)!.microblogPublishing,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _microblogFilenameController,
-                  decoration: const InputDecoration(
-                    labelText: "Filename (in Vault)",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.microblogFilename,
                     hintText: "function/microblog.md",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogFilename, val),
@@ -595,10 +670,10 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogTitleController,
-                  decoration: const InputDecoration(
-                    labelText: "Blog Title",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.microblogTitle,
                     hintText: "My Microblog",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogTitle, val),
@@ -606,12 +681,12 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogPermalinkController,
-                  decoration: const InputDecoration(
-                    labelText: "DG Permalink (Slug)",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.microblogPermalink,
                     hintText: "microblog",
                     helperText:
-                        "Permanent link suffix (e.g., mysite.com/microblog)",
-                    border: OutlineInputBorder(),
+                        AppLocalizations.of(context)!.microblogPermalinkHelper,
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogPermalink, val),
@@ -619,10 +694,10 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogTagController,
-                  decoration: const InputDecoration(
-                    labelText: "Filter Tag",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.microblogTag,
                     hintText: "#mb",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogTag, val),
@@ -630,10 +705,11 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogAvatarPathController,
-                  decoration: const InputDecoration(
-                    labelText: "Avatar Path (in Vault)",
+                  decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.microblogAvatarPath,
                     hintText: "assets/avatar.png",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogAvatarPath, val),
@@ -641,25 +717,25 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogUsernameController,
-                  decoration: const InputDecoration(
-                    labelText: "Username",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.microblogUsername,
                     hintText: "Me",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogUsername, val),
                 ),
                 const SizedBox(height: 20),
-                const Text("Push Configuration (GitHub)",
-                    style: TextStyle(
+                Text(AppLocalizations.of(context)!.pushConfig,
+                    style: const TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.grey)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogRepoUrlController,
-                  decoration: const InputDecoration(
-                    labelText: "Repo URL",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.repoUrl,
                     hintText: "https://github.com/user/repo.git",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogRepoUrl, val),
@@ -667,10 +743,10 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogRepoPathController,
-                  decoration: const InputDecoration(
-                    labelText: "Target Path in Repo",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.repoPath,
                     hintText: "src/site/notes/",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogRepoPath, val),
@@ -678,10 +754,10 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogRepoImagePathController,
-                  decoration: const InputDecoration(
-                    labelText: "Image Path in Repo",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.repoImagePath,
                     hintText: "src/site/img/user/microblog",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogRepoImagePath, val),
@@ -689,10 +765,10 @@ class _SettingsViewState extends State<SettingsView> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _microblogWebImagePrefixController,
-                  decoration: const InputDecoration(
-                    labelText: "Web Image Prefix",
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.webImagePrefix,
                     hintText: "/img/user/microblog",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogWebImagePrefix, val),
@@ -701,10 +777,11 @@ class _SettingsViewState extends State<SettingsView> {
                 TextField(
                   controller: _microblogRepoTokenController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: "Personal Access Token",
+                  decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.personalAccessToken,
                     hintText: "github_pat_...",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (val) => _saveMicroblogSetting(
                       SettingsService().updateMicroblogRepoToken, val),
@@ -718,23 +795,23 @@ class _SettingsViewState extends State<SettingsView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ExpansionTile(
-              title: const Text("AI Assistant",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(AppLocalizations.of(context)!.aiAssistant,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               tilePadding: EdgeInsets.zero,
               children: [
                 const SizedBox(height: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Base URL (e.g. https://api.openai.com/v1):"),
+                    Text(AppLocalizations.of(context)!.aiBaseUrl),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _aiBaseUrlController,
                       enableSuggestions: false,
                       autocorrect: false,
-                      decoration: const InputDecoration(
-                        hintText: "Enter base URL (optional)",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.enterBaseUrl,
+                        border: const OutlineInputBorder(),
                         isDense: true,
                       ),
                       onSubmitted: (value) {
@@ -747,16 +824,16 @@ class _SettingsViewState extends State<SettingsView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("API Key:"),
+                    Text(AppLocalizations.of(context)!.aiApiKey),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _aiApiKeyController,
                       obscureText: true,
                       enableSuggestions: false,
                       autocorrect: false,
-                      decoration: const InputDecoration(
-                        hintText: "Enter API Key",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.enterApiKey,
+                        border: const OutlineInputBorder(),
                         isDense: true,
                       ),
                       onSubmitted: (value) {
@@ -769,15 +846,15 @@ class _SettingsViewState extends State<SettingsView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Model Name (e.g. gpt-4o):"),
+                    Text(AppLocalizations.of(context)!.aiModelName),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _aiModelNameController,
                       enableSuggestions: false,
                       autocorrect: false,
-                      decoration: const InputDecoration(
-                        hintText: "Enter model name",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.enterModelName,
+                        border: const OutlineInputBorder(),
                         isDense: true,
                       ),
                       onSubmitted: (value) {
@@ -794,7 +871,7 @@ class _SettingsViewState extends State<SettingsView> {
           Padding(
               padding: const EdgeInsets.all(16),
               child: Column(children: [
-                const Text("Contact the developer:"),
+                Text(AppLocalizations.of(context)!.contactDeveloper),
                 GestureDetector(
                   onTap: () {
                     _launchEmail(context);
@@ -816,7 +893,7 @@ class _SettingsViewState extends State<SettingsView> {
                   future: widget.controller.getAppVersion(),
                   builder: (context, snapshot) {
                     return Text(
-                      'Version: ${snapshot.data ?? 'Loading...'}',
+                      '${AppLocalizations.of(context)!.version} ${snapshot.data ?? 'Loading...'}',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 14,
@@ -840,8 +917,58 @@ class _SettingsViewState extends State<SettingsView> {
       await launchUrl(emailUri);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not launch $emailUri')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!
+                .couldNotLaunch(emailUri.toString()))),
       );
     }
+  }
+
+  String _getLocaleDisplayName(Locale locale) {
+    if (locale.languageCode == 'en') return 'English';
+    if (locale.languageCode == 'zh') return '简体中文';
+
+    // For custom languages, find the name
+    try {
+      final custom = widget.controller.customLanguages.firstWhere(
+        (l) => l.locale == locale.languageCode,
+      );
+      return custom.name;
+    } catch (_) {
+      return locale.languageCode;
+    }
+  }
+
+  Future<void> _importDictionary() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      try {
+        await widget.controller.importDictionary(result.files.single.path!);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.dictionaryImported)),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(AppLocalizations.of(context)!
+                    .dictionaryImportFailed("$e"))),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _removeDictionary(String locale) async {
+    await widget.controller.removeDictionary(locale);
+    setState(() {});
   }
 }

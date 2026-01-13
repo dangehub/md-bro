@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -117,18 +118,17 @@ class _MemosScreenState extends State<MemosScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Image'),
-        content: const Text(
-            'Are you sure you want to delete this image? This will permanently delete the file from your vault.'),
+        title: Text(AppLocalizations.of(context)!.deleteImage),
+        content: Text(AppLocalizations.of(context)!.deleteImageConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -145,13 +145,16 @@ class _MemosScreenState extends State<MemosScreen> {
           await file.delete();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Image deleted')),
+              SnackBar(
+                  content: Text(AppLocalizations.of(context)!.imageDeleted)),
             );
           }
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to delete: $e')),
+              SnackBar(
+                  content: Text(AppLocalizations.of(context)!
+                      .deleteFailed(e.toString()))),
             );
           }
         }
@@ -424,8 +427,9 @@ class _MemosScreenState extends State<MemosScreen> {
     if (attachmentDir == null || attachmentDir.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('请先在设置中配置 Memos 附件目录'),
+          SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.memosAttachmentDirNotConfigured),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -439,8 +443,8 @@ class _MemosScreenState extends State<MemosScreen> {
     if (vaultDir == null || vaultDir.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('请先配置 Vault 目录'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.vaultNotConfigured),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -523,7 +527,8 @@ class _MemosScreenState extends State<MemosScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('附件已保存到: $resolvedDir'),
+            content: Text(
+                AppLocalizations.of(context)!.attachmentSaved(resolvedDir)),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
           ),
@@ -533,7 +538,8 @@ class _MemosScreenState extends State<MemosScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('保存附件失败: $e'),
+            content: Text(AppLocalizations.of(context)!
+                .attachmentSaveFailed(e.toString())),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -552,8 +558,8 @@ class _MemosScreenState extends State<MemosScreen> {
     if (repoUrl.isEmpty || repoToken.isEmpty || repoPath.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('请先在设置中配置微博发布信息 (Repo, Token, Path)'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.microblogNotConfigured),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -566,15 +572,15 @@ class _MemosScreenState extends State<MemosScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('发布微博客'),
-          content: Text('即将聚合带有 $tag 的 Memos 并推送到 GitHub。\n确定继续吗？'),
+          title: Text(AppLocalizations.of(context)!.publishMicroblog),
+          content: Text(AppLocalizations.of(context)!.publishConfirmation(tag)),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('取消')),
+                child: Text(AppLocalizations.of(context)!.cancel)),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('发布'),
+              child: Text(AppLocalizations.of(context)!.publish),
             ),
           ],
         ),
@@ -586,14 +592,14 @@ class _MemosScreenState extends State<MemosScreen> {
 
     // 3. Show Loading
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Row(children: [
           SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2)),
           SizedBox(width: 12),
-          Text('正在生成并推送...'),
+          Text(AppLocalizations.of(context)!.publishing),
         ]),
         duration: Duration(minutes: 1), // Long duration, we'll hide it later
       ),
@@ -611,14 +617,14 @@ class _MemosScreenState extends State<MemosScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(children: [
               SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2)),
               SizedBox(width: 12),
-              Text('正在推送内容...'),
+              Text(AppLocalizations.of(context)!.pushingContent),
             ]),
             duration: Duration(seconds: 30),
           ),
@@ -633,7 +639,7 @@ class _MemosScreenState extends State<MemosScreen> {
       );
 
       // 6. Push Assets
-      String assetMessage = '没有附件更新';
+      String assetMessage = AppLocalizations.of(context)!.noAttachmentsUpdated;
       if (result.assets.isNotEmpty) {
         final assetFiles = result.assets.map((e) => e.localFile).toList();
         final assetPaths = result.assets.map((e) => e.remotePath).toList();
@@ -664,14 +670,16 @@ class _MemosScreenState extends State<MemosScreen> {
             }
           },
         );
-        assetMessage = '新增 $uploadedCount 个附件';
+        assetMessage =
+            AppLocalizations.of(context)!.newAttachments(uploadedCount);
       }
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('发布成功！$assetMessage'),
+            content: Text(
+                AppLocalizations.of(context)!.publishSuccess(assetMessage)),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
           ),
@@ -682,7 +690,8 @@ class _MemosScreenState extends State<MemosScreen> {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('发布失败: $e'),
+            content:
+                Text(AppLocalizations.of(context)!.publishFailed(e.toString())),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red,
           ),
@@ -702,7 +711,7 @@ class _MemosScreenState extends State<MemosScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.cloud_upload_outlined),
-              tooltip: '发布微博客',
+              tooltip: AppLocalizations.of(context)!.publishMicroblog,
               onPressed: () => _onPublishPressed(context),
             ),
             const SizedBox(width: 8),
@@ -780,7 +789,8 @@ class _MemosScreenState extends State<MemosScreen> {
                       size: 14, color: colorScheme.onPrimaryContainer),
                   const SizedBox(width: 4),
                   Text(
-                    '正在编辑 ${_formatDateTime(_editingMemo!.dateTime)}',
+                    AppLocalizations.of(context)!
+                        .editingTime(_formatDateTime(_editingMemo!.dateTime)),
                     style: TextStyle(
                       fontSize: 12,
                       color: colorScheme.onPrimaryContainer,
@@ -1238,7 +1248,7 @@ class _MemosScreenState extends State<MemosScreen> {
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Memo updated'),
             duration: Duration(seconds: 1),
           ),
@@ -1270,7 +1280,7 @@ class _MemosScreenState extends State<MemosScreen> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Memo added'),
             duration: Duration(seconds: 1),
           ),

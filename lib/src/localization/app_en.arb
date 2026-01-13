@@ -2,5 +2,255 @@
   "appTitle": "MD Bro",
   "@appTitle": {
     "description": "The title of the application"
-  }
+  },
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "ok": "OK",
+  "confirm": "Confirm",
+  "loading": "Loading...",
+  "success": "Success",
+  "error": "Error",
+  "undo": "Undo",
+  "retry": "Retry",
+  
+  "settings": "Settings",
+  "general": "General",
+  "tasks": "Tasks",
+  "memos": "Memos",
+  "aiAssistant": "AI Assistant",
+  "language": "Language",
+  "importDictionary": "Import Dictionary",
+  "manageDictionaries": "Manage Dictionaries",
+  
+  "vaultFolderPrompt": "Folder in the Obsidian vault containing tasks:",
+  "select": "Select",
+  "pleaseChooseFolder": "<Please choose the folder>",
+  "storagePermissionRequired": "Storage permission is required to select a directory.",
+  "noExternalStorageFound": "No external storage directories found.",
+  
+  "showOnboarding": "Show on-boarding screen:",
+  "showOnboardingDesc": "Enable to show the on-boarding screen when the app starts",
+  
+  "dailyReminderTasks": "Daily reminder to review tasks:",
+  "dailyReminderCompleted": "Daily reminder to review completed tasks:",
+  "time": "Time:",
+  "notSet": "Not set",
+  "clearReminder": "Clear reminder",
+  "reviewTasksNotification": "Review your tasks (you can remove this reminder in Settings)",
+  "reviewCompletedNotification": "Review your completed tasks (you can remove this reminder in Settings)",
+  
+  "tasksFileName": "File name for adding new tasks (located at the path below):",
+  "globalTaskFilter": "Global Task Filter:",
+  "enterGlobalFilter": "Enter a global task filter, e.g. #task",
+  
+  "memosPath": "Memos Path:",
+  "memosPathDesc": "Static path (e.g., memos.md) or dynamic path with date variables (e.g., <YYYY>/<YYYY-MM-DD>.md)",
+  "dynamicPath": "Dynamic Path:",
+  "dynamicPathDesc": "Enable if path contains date variables like <YYYY-MM-DD>",
+  "widgetSortOrder": "Widget Sort Order:",
+  "widgetSortOrderDesc": "Ascending shows oldest memos first; Descending shows newest first",
+  "asc": "Asc",
+  "desc": "Desc",
+  "memosAttachmentDir": "Attachment Directory (assets):",
+  "memosAttachmentDirDesc": "Path relative to Vault, supports date variables. e.g. assets or <YYYY>/assets",
+  "enterMemosAttachmentDir": "e.g., assets or <YYYY>/assets",
+  
+  "imageCompression": "Image Compression",
+  "enableCompression": "Enable Compression",
+  "enableCompressionDesc": "Compress images before saving to vault",
+  "format": "Format",
+  "quality": "Quality:",
+  
+  "microblogPublishing": "Microblog Publishing",
+  "microblogFilename": "Filename (in Vault)",
+  "microblogTitle": "Blog Title",
+  "microblogPermalink": "DG Permalink (Slug)",
+  "microblogPermalinkHelper": "Permanent link suffix (e.g., mysite.com/microblog)",
+  "microblogTag": "Filter Tag",
+  "microblogAvatarPath": "Avatar Path (in Vault)",
+  "microblogUsername": "Username",
+  
+  "pushConfig": "Push Configuration (GitHub)",
+  "repoUrl": "Repo URL",
+  "repoPath": "Target Path in Repo",
+  "repoImagePath": "Image Path in Repo",
+  "webImagePrefix": "Web Image Prefix",
+  "personalAccessToken": "Personal Access Token",
+  
+  "aiAssistant": "AI Assistant",
+  "enterBaseUrl": "Enter base URL (optional)",
+  "enterApiKey": "Enter API Key",
+  
+  "aiBaseUrl": "Base URL (e.g. https://api.openai.com/v1):",
+  "aiApiKey": "API Key:",
+  "aiModelName": "Model Name (e.g. gpt-4o):",
+  
+  "about": "About",
+  
+  "contactDeveloper": "Contact the developer:",
+  "version": "Version:",
+  "couldNotLaunch": "Could not launch {url}",
+  "@couldNotLaunch": {
+    "placeholders": {
+      "url": {}
+    }
+  },
+
+  "memosAttachmentDirNotConfigured": "Please configure Memos attachment directory in settings",
+  "vaultNotConfigured": "Please configure Vault directory first",
+  "attachmentSaved": "Attachment saved to: {path}",
+  "@attachmentSaved": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "attachmentSaveFailed": "Failed to save attachment: {error}",
+  "@attachmentSaveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "microblogNotConfigured": "Please configure Microblog settings (Repo, Token, Path) in settings",
+  "publishMicroblog": "Publish Microblog",
+  "publishConfirmation": "This will aggregate memos with {tag} and push to GitHub.\nAre you sure to continue?",
+  "@publishConfirmation": {
+      "placeholders": {
+        "tag": {}
+      }
+    },
+  "publish": "Publish",
+  "publishing": "Generating and pushing...",
+  "pushingContent": "Pushing content...",
+  "noAttachmentsUpdated": "No attachments updated",
+  "attachmentsUploaded": "Uploaded {count} attachments: {message}",
+  "@attachmentsUploaded": {
+    "placeholders": {
+      "count": {},
+      "message": {}
+    }
+  },
+  "newAttachments": "New {count} attachments",
+  "@newAttachments": {
+      "placeholders": {
+        "count": {}
+      }
+    },
+  "publishSuccess": "Published successfully! {message}",
+  "@publishSuccess": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "publishFailed": "Publish failed: {error}",
+  "@publishFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "editingTime": "Editing {time}",
+  
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "deleteImage": "Delete Image",
+  "deleteImageConfirmation": "Are you sure you want to delete this image? This will permanently delete the file from your vault.",
+  "imageDeleted": "Image deleted",
+  "deleteFailed": "Failed to delete: {error}",
+  "@deleteFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  
+  "enterModelName": "Enter model name",
+  "dictionaryImported": "Dictionary imported successfully",
+  "dictionaryImportFailed": "Failed to import dictionary: {error}",
+  "@dictionaryImportFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "@editingTime": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "memoHint": "What's on your mind?",
+  "memoEditHint": "Modify content...",
+  "insertTag": "Insert tag #",
+  "insertWikiLink": "Insert link [[]]",
+  "addAttachment": "Add attachment",
+  "jumpToDate": "Jump to date",
+  "shareImageError": "Image path not found in cache",
+
+  "manageFilters": "Manage Filters",
+  "deleteFilter": "Delete Filter",
+  "deleteFilterConfirmation": "Are you sure you want to delete \"{name}\"?",
+  "@deleteFilterConfirmation": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "selectWidgetFilter": "Select Widget Filter",
+  "defaultFilter": "Default",
+  "widgetDisplay": "Desktop Widget Display",
+  "filterName": "Filter Name",
+  "taskStatus": "Task Status",
+  "matchConditions": "Match {mode} conditions",
+  "@matchConditions": {
+    "placeholders": {
+      "mode": {}
+    }
+  },
+  "allMode": "ALL",
+  "anyMode": "ANY",
+  "addFilterGroup": "Add Filter Group",
+  "addCondition": "Add condition",
+  "inheritDate": "Inherit Date from Filename",
+  "includeTags": "Tags (Include)",
+  "excludeTags": "Excluded Tags",
+  "enterTagHint": "Enter tag and click add",
+  "pathContains": "File path contains",
+  "groupBy": "Group By",
+  "none": "None",
+  "dueDate": "Due Date",
+  "scheduledDate": "Scheduled Date",
+  "filePath": "File Path",
+  "priority": "Priority",
+  "status": "Status",
+  "sortRules": "Sort Rules (Priority from top to bottom)",
+  "ascending": "Ascending",
+  "descending": "Descending",
+  "createdDate": "Created Date",
+  "alphabetical": "Alphabetical",
+  "enterFilterName": "Please enter filter name",
+  "filterTasks": "Filter tasks...",
+  "newFilter": "New Filter",
+  "editFilter": "Edit Filter",
+
+  "aiDataReview": "Data Review: {name}",
+  "@aiDataReview": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "aiDataReviewDesc": "The following data will be sent to AI, please check for sensitive info:",
+  "noData": "(No data)",
+  "reject": "Reject",
+  "approve": "Approve",
+  "approved": "✅ User approved data sending",
+  "rejected": "❌ User rejected data sending",
+  "editData": "Edit Data",
+  "editDataHint": "Edit data to send to AI...",
+  "sendEdited": "Send edited data",
+  "apiKeyMissing": "❌ API Key missing. Please configure it in Settings > AI Assistant.",
+  
+  "todayTaskDefaults": "Today Task Defaults",
+  "newTaskDefaults": "New Task Defaults ({name})",
+  "@newTaskDefaults": {
+      "placeholders": {
+        "name": {}
+      }
+    }
 }
