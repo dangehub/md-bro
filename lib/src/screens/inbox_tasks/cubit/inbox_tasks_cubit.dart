@@ -267,43 +267,7 @@ class InboxTasksCubit extends Cubit<InboxTasksState> {
     }).toList();
 
     // 6. Apply Sorting
-    if (currentFilterList.sortRules.isNotEmpty) {
-      filteredTasks.sort((a, b) {
-        for (var rule in currentFilterList.sortRules) {
-          int cmp = 0;
-          switch (rule.field) {
-            case SortField.alphabetical:
-              cmp = (a.description ?? "").compareTo(b.description ?? "");
-              break;
-            case SortField.dueDate:
-              cmp = _compareDates(a.due, b.due);
-              break;
-            case SortField.scheduledDate:
-              // For scheduled, maybe consider inferred? using a.scheduled directly
-              cmp = _compareDates(a.scheduled, b.scheduled);
-              break;
-            case SortField.createdDate:
-              cmp = _compareDates(a.created, b.created);
-              break;
-            case SortField.priority:
-              // Enum order: lowest(0) -> highest(5).
-              // Ascending: 0->5. Descending: 5->0.
-              cmp = a.priority.index.compareTo(b.priority.index);
-              break;
-            case SortField.status:
-              cmp = a.status.index.compareTo(b.status.index);
-              break;
-          }
-          if (cmp != 0) {
-            return rule.direction == SortDirection.ascending ? cmp : -cmp;
-          }
-        }
-        return 0; // All rules equal
-      });
-    } else {
-      // Fallback to legacy SortMode
-      filteredTasks.sort((a, b) => _compareTasksLegacy(a, b, sortMode));
-    }
+    _sortTasks(filteredTasks);
 
     _taskDoneCount = taskDoneCount;
     _taskCount = filteredTasks.length;
@@ -440,7 +404,7 @@ class InboxTasksCubit extends Cubit<InboxTasksState> {
 
   /// Get currently filtered tasks (helper for state emission)
   List<Task> _getFilteredTasks() {
-    return _tasks.where((task) {
+    var filteredTasks = _tasks.where((task) {
       // Check if task is pending undo
       final taskId = task.taskSource?.id.toString() ?? task.description ?? '';
       if (_pendingChanges.containsKey(taskId)) {
@@ -454,6 +418,45 @@ class InboxTasksCubit extends Cubit<InboxTasksState> {
       var description = task.description ?? "";
       return description.toLowerCase().contains(searchQuery.toLowerCase());
     }).toList();
+
+    _sortTasks(filteredTasks);
+    return filteredTasks;
+  }
+
+  void _sortTasks(List<Task> tasks) {
+    if (currentFilterList.sortRules.isNotEmpty) {
+      tasks.sort((a, b) {
+        for (var rule in currentFilterList.sortRules) {
+          int cmp = 0;
+          switch (rule.field) {
+            case SortField.alphabetical:
+              cmp = (a.description ?? "").compareTo(b.description ?? "");
+              break;
+            case SortField.dueDate:
+              cmp = _compareDates(a.due, b.due);
+              break;
+            case SortField.scheduledDate:
+              cmp = _compareDates(a.scheduled, b.scheduled);
+              break;
+            case SortField.createdDate:
+              cmp = _compareDates(a.created, b.created);
+              break;
+            case SortField.priority:
+              cmp = a.priority.index.compareTo(b.priority.index);
+              break;
+            case SortField.status:
+              cmp = a.status.index.compareTo(b.status.index);
+              break;
+          }
+          if (cmp != 0) {
+            return rule.direction == SortDirection.ascending ? cmp : -cmp;
+          }
+        }
+        return 0;
+      });
+    } else {
+      tasks.sort((a, b) => _compareTasksLegacy(a, b, sortMode));
+    }
   }
 
   /// Legacy method - immediate status change without undo
