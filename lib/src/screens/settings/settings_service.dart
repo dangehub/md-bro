@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:obsi/src/screens/notes_widget_config/cubit/notes_widget_config_cubit.dart';
@@ -602,5 +603,27 @@ class SettingsService {
   Future<void> updateMicroblogWebImagePrefix(String value) async {
     var sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setString(_microblogWebImagePrefixKey, value);
+  }
+
+  static const String _expandedSectionsKey = "expanded_sections";
+
+  Future<Map<String, bool>> expandedSections() async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    var jsonString = sharedPreferences.getString(_expandedSectionsKey);
+    if (jsonString != null) {
+      try {
+        Map<String, dynamic> decoded = json.decode(jsonString);
+        return decoded.map((key, value) => MapEntry(key, value as bool));
+      } catch (e) {
+        // ignore error
+      }
+    }
+    return {};
+  }
+
+  Future<void> updateExpandedSections(Map<String, bool> sections) async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString(
+        _expandedSectionsKey, json.encode(sections));
   }
 }

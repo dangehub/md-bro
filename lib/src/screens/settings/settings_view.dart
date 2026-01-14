@@ -183,7 +183,7 @@ class _SettingsViewState extends State<SettingsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(AppLocalizations.of(context)!.settings),
       ),
       body: SafeArea(
         bottom: true,
@@ -194,7 +194,10 @@ class _SettingsViewState extends State<SettingsView> {
             child: ExpansionTile(
               title: Text(AppLocalizations.of(context)!.language,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-              initiallyExpanded: false,
+              initiallyExpanded:
+                  widget.controller.expandedSections['language'] ?? false,
+              onExpansionChanged: (val) =>
+                  widget.controller.updateSectionExpanded('language', val),
               tilePadding: EdgeInsets.zero,
               children: [
                 // Language Dropdown
@@ -260,7 +263,10 @@ class _SettingsViewState extends State<SettingsView> {
             child: ExpansionTile(
               title: Text(AppLocalizations.of(context)!.general,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-              initiallyExpanded: true,
+              initiallyExpanded:
+                  widget.controller.expandedSections['general'] ?? true,
+              onExpansionChanged: (val) =>
+                  widget.controller.updateSectionExpanded('general', val),
               tilePadding: EdgeInsets.zero,
               children: [
                 const SizedBox(height: 8),
@@ -425,8 +431,12 @@ class _SettingsViewState extends State<SettingsView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ExpansionTile(
-              title: const Text("Tasks",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(AppLocalizations.of(context)!.tasks,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              initiallyExpanded:
+                  widget.controller.expandedSections['tasks'] ?? false,
+              onExpansionChanged: (val) =>
+                  widget.controller.updateSectionExpanded('tasks', val),
               tilePadding: EdgeInsets.zero,
               children: [
                 const SizedBox(height: 8),
@@ -476,6 +486,10 @@ class _SettingsViewState extends State<SettingsView> {
             child: ExpansionTile(
               title: Text(AppLocalizations.of(context)!.memos,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
+              initiallyExpanded:
+                  widget.controller.expandedSections['memos'] ?? false,
+              onExpansionChanged: (val) =>
+                  widget.controller.updateSectionExpanded('memos', val),
               tilePadding: EdgeInsets.zero,
               children: [
                 const SizedBox(height: 8),
@@ -797,6 +811,10 @@ class _SettingsViewState extends State<SettingsView> {
             child: ExpansionTile(
               title: Text(AppLocalizations.of(context)!.aiAssistant,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
+              initiallyExpanded:
+                  widget.controller.expandedSections['ai'] ?? false,
+              onExpansionChanged: (val) =>
+                  widget.controller.updateSectionExpanded('ai', val),
               tilePadding: EdgeInsets.zero,
               children: [
                 const SizedBox(height: 8),

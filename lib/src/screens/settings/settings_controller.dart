@@ -191,6 +191,11 @@ class SettingsController with ChangeNotifier {
   DateTime? _reviewTasksReminderTime;
   DateTime? _reviewCompletedReminderTime;
 
+  // Expanded Sections State
+  Map<String, bool> _expandedSections = {
+    'general': true, // Default to true
+  };
+
   // Memos settings
   String? _memosPath;
   bool _memosPathIsDynamic = false;
@@ -256,6 +261,10 @@ class SettingsController with ChangeNotifier {
     _onboardingComplete = await _settingsService.onboardingComplete();
     _subscriptionStatus = await _settingsService.subscriptionStatus();
     _subscriptionExpiry = await _settingsService.subscriptionExpiry();
+    _expandedSections = await _settingsService.expandedSections();
+    if (!_expandedSections.containsKey('general')) {
+      _expandedSections['general'] = true;
+    }
     _reviewTasksReminderTime = await _settingsService.reviewTasksReminderTime();
 
     _reviewCompletedReminderTime =
@@ -632,6 +641,7 @@ class SettingsController with ChangeNotifier {
     _subscriptionStatus = status;
     notifyListeners();
     await _settingsService.updateSubscriptionStatus(status);
+    await _settingsService.updateSubscriptionStatus(status);
   }
 
   Future<void> updateSubscriptionExpiry(DateTime? expiry) async {
@@ -694,6 +704,14 @@ class SettingsController with ChangeNotifier {
     _filters.insert(newIndex, item);
     notifyListeners();
     await _saveFilters();
+  }
+
+  Map<String, bool> get expandedSections => _expandedSections;
+
+  Future<void> updateSectionExpanded(String section, bool isExpanded) async {
+    _expandedSections[section] = isExpanded;
+    notifyListeners();
+    await _settingsService.updateExpandedSections(_expandedSections);
   }
 
   Future<void> _saveFilters() async {
