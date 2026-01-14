@@ -315,6 +315,368 @@ class AppLocalizationsZh extends AppLocalizations {
   String get imageDeleted => '图片已删除';
 
   @override
+  String get filterStatus => '状态';
+
+  @override
+  String get filterScheduledDate => '计划日期';
+
+  @override
+  String get filterDueDate => '截止日期';
+
+  @override
+  String get filterTag => '标签';
+
+  @override
+  String get filterPath => '路径';
+
+  @override
+  String get filterPriority => '优先级';
+
+  @override
+  String get opAny => '任意';
+
+  @override
+  String get opIs => '是';
+
+  @override
+  String get opIsNot => '不是';
+
+  @override
+  String get opIsBefore => '早于';
+
+  @override
+  String get opIsAfter => '晚于';
+
+  @override
+  String get opIsToday => '是今天';
+
+  @override
+  String get opIsBeforeToday => '早于今天';
+
+  @override
+  String get opIsAfterToday => '晚于今天';
+
+  @override
+  String get opIsInNextDays => '在未来几天内';
+
+  @override
+  String get opIsInPrevDays => '在过去几天内';
+
+  @override
+  String get opIsEmpty => '为空';
+
+  @override
+  String get opIsNotEmpty => '不为空';
+
+  @override
+  String get taskStatusAll => '全部';
+
+  @override
+  String get taskStatusTodo => '待办';
+
+  @override
+  String get taskStatusDone => '已完成';
+
+  @override
+  String get labelMatch => '匹配';
+
+  @override
+  String get labelAll => '全部';
+
+  @override
+  String get labelAny => '任意';
+
+  @override
+  String get labelConditions => '条件';
+
+  @override
+  String get btnAddCondition => '添加条件';
+
+  @override
+  String get hintDays => '天数';
+
+  @override
+  String get hintTag => '标签';
+
+  @override
+  String get hintPath => '路径';
+
+  @override
+  String get hintPriority => '1-5';
+
+  @override
+  String get btnSelectDate => '选择日期';
+
+  @override
+  String get msgEnterFilterName => '请输入筛选名称';
+
+  @override
+  String get titleNewFilter => '新建筛选';
+
+  @override
+  String get titleEditFilter => '编辑筛选';
+
+  @override
+  String get labelFilterName => '筛选名称';
+
+  @override
+  String get headerFilterConditions => '筛选条件';
+
+  @override
+  String get memosToday => '今天';
+
+  @override
+  String get memosYesterday => '昨天';
+
+  @override
+  String get btnSelectMonth => '选择月份';
+
+  @override
+  String get labelYear => '年份';
+
+  @override
+  String get labelMonth => '月份';
+
+  @override
+  String get labelInheritDate => '从文件名获取日期';
+
+  @override
+  String get labelTagsInclude => '包含标签';
+
+  @override
+  String get labelTagsExclude => '排除标签';
+
+  @override
+  String get hintEnterTag => '输入标签后回车';
+
+  @override
+  String get labelPathContains => '路径包含';
+
+  @override
+  String get hintPathExample => '例如：Work/Projects';
+
+  @override
+  String get labelGroupBy => '分组方式';
+
+  @override
+  String get groupNone => '不分组';
+
+  @override
+  String get groupDueDate => '截止日期';
+
+  @override
+  String get groupScheduledDate => '计划日期';
+
+  @override
+  String get groupFilePath => '文件路径';
+
+  @override
+  String get groupPriority => '优先级';
+
+  @override
+  String get groupStatus => '状态';
+
+  @override
+  String get labelSortRules => '排序规则';
+
+  @override
+  String get sortAsc => '升序';
+
+  @override
+  String get sortDesc => '降序';
+
+  @override
+  String get sortAlphabetical => '字母顺序';
+
+  @override
+  String get sortCreatedDate => '创建日期';
+
+  @override
+  String get btnAddSortRule => '添加排序规则';
+
+  @override
+  String get headerNewTaskDefaults => '新任务默认设置';
+
+  @override
+  String get labelDefaultTags => '默认标签';
+
+  @override
+  String get hintDefaultTag => '输入默认标签';
+
+  @override
+  String get labelDefaultDueDate => '默认截止日期';
+
+  @override
+  String get labelOffsetDays => '偏移天数 (0=今天)';
+
+  @override
+  String get labelSpecificDate => '指定日期';
+
+  @override
+  String get datePresetNone => '无';
+
+  @override
+  String get datePresetToday => '今天';
+
+  @override
+  String get datePresetTomorrow => '明天';
+
+  @override
+  String get datePresetTodayPlusDays => '今天 + 天数';
+
+  @override
+  String get actionKeep => '保留';
+
+  @override
+  String get actionDelete => '删除';
+
+  @override
+  String get actionArchive => '归档';
+
+  @override
+  String get titleManageFilters => '管理筛选列表';
+
+  @override
+  String get labelWidgetDisplay => '桌面组件显示';
+
+  @override
+  String get labelDefault => '默认';
+
+  @override
+  String confirmDeleteFilter(String name) {
+    return '确定要删除 \"$name\" 吗？';
+  }
+
+  @override
+  String get titleDeleteFilter => '删除筛选';
+
+  @override
+  String get titleSelectWidgetFilter => '选择组件筛选器';
+
+  @override
+  String get labelCompletionAction => '完成时动作';
+
+  @override
+  String get headerTaskStatus => '任务状态';
+
+  @override
+  String get labelTask => '任务';
+
+  @override
+  String get labelTaskDescription => '任务描述';
+
+  @override
+  String get hintEnterTask => '在此输入任务内容';
+
+  @override
+  String get labelTags => '标签';
+
+  @override
+  String get msgNoTagsAvailable => '暂无可用标签';
+
+  @override
+  String get headerPlanning => '计划';
+
+  @override
+  String get labelPriority => '优先级';
+
+  @override
+  String get labelRecurrence => '重复';
+
+  @override
+  String get labelDue => '截止';
+
+  @override
+  String get labelScheduled => '计划';
+
+  @override
+  String get labelStart => '开始';
+
+  @override
+  String get headerNotifications => '通知';
+
+  @override
+  String get labelScheduledNotification => '计划通知';
+
+  @override
+  String get headerStatusMetadata => '状态与元数据';
+
+  @override
+  String get labelStatus => '状态';
+
+  @override
+  String get labelCreated => '创建于';
+
+  @override
+  String get labelDone => '完成于';
+
+  @override
+  String get labelCancelled => '取消于';
+
+  @override
+  String get priorityLowest => '最低';
+
+  @override
+  String get priorityLow => '低';
+
+  @override
+  String get priorityNormal => '普通';
+
+  @override
+  String get priorityMedium => '中';
+
+  @override
+  String get priorityHigh => '高';
+
+  @override
+  String get priorityHighest => '最高';
+
+  @override
+  String get taskStatusInprogress => '进行中';
+
+  @override
+  String get taskStatusCancelled => '已取消';
+
+  @override
+  String get recurrenceNone => '无';
+
+  @override
+  String get recurrenceDaily => '每天';
+
+  @override
+  String get recurrenceWeekly => '每周';
+
+  @override
+  String get recurrenceMonthly => '每月';
+
+  @override
+  String get recurrenceYearly => '每年';
+
+  @override
+  String get recurrenceWeekday => '每个工作日';
+
+  @override
+  String get recurrenceMonday => '每周一';
+
+  @override
+  String get recurrenceTuesday => '每周二';
+
+  @override
+  String get recurrenceWednesday => '每周三';
+
+  @override
+  String get recurrenceThursday => '每周四';
+
+  @override
+  String get recurrenceFriday => '每周五';
+
+  @override
+  String get recurrenceSaturday => '每周六';
+
+  @override
+  String get recurrenceSunday => '每周日';
+
+  @override
   String deleteFailed(Object error) {
     return '删除失败: $error';
   }

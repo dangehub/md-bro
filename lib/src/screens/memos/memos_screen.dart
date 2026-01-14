@@ -1037,11 +1037,13 @@ class _MemosScreenState extends State<MemosScreen> {
     final memoDate = DateTime(date.year, date.month, date.day);
 
     if (memoDate == today) {
-      return 'Today';
+      return AppLocalizations.of(context)!.memosToday;
     } else if (memoDate == today.subtract(const Duration(days: 1))) {
-      return 'Yesterday';
+      return AppLocalizations.of(context)!.memosYesterday;
     } else {
-      return DateFormat('yyyy/MM/dd (EEE)').format(date);
+      return DateFormat(
+              'yyyy/MM/dd (EEE)', AppLocalizations.of(context)!.localeName)
+          .format(date);
     }
   }
 
@@ -1401,6 +1403,7 @@ class _MemosCalendarPickerState extends State<_MemosCalendarPicker> {
                     firstDay: widget.firstDate,
                     lastDay: widget.lastDate,
                     focusedDay: _focusedDay,
+                    locale: AppLocalizations.of(context)!.localeName,
                     startingDayOfWeek: StartingDayOfWeek.monday,
                     headerStyle: const HeaderStyle(
                       titleCentered: true,
@@ -1424,7 +1427,10 @@ class _MemosCalendarPickerState extends State<_MemosCalendarPicker> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    DateFormat.yMMMM().format(day),
+                                    DateFormat.yMMMM(
+                                            AppLocalizations.of(context)!
+                                                .localeName)
+                                        .format(day),
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleLarge
@@ -1518,7 +1524,7 @@ class _YearMonthPickerState extends State<_YearMonthPicker> {
     final months = List.generate(12, (index) => index + 1);
 
     return AlertDialog(
-      title: const Text('Select Month'),
+      title: Text(AppLocalizations.of(context)!.btnSelectMonth),
       content: SizedBox(
         height: 200,
         child: Row(
@@ -1527,7 +1533,8 @@ class _YearMonthPickerState extends State<_YearMonthPicker> {
             Expanded(
               child: Column(
                 children: [
-                  Text('Year', style: theme.textTheme.labelMedium),
+                  Text(AppLocalizations.of(context)!.labelYear,
+                      style: theme.textTheme.labelMedium),
                   Expanded(
                     child: ListWheelScrollView.useDelegate(
                       itemExtent: 40,
@@ -1566,7 +1573,8 @@ class _YearMonthPickerState extends State<_YearMonthPicker> {
             Expanded(
               child: Column(
                 children: [
-                  Text('Month', style: theme.textTheme.labelMedium),
+                  Text(AppLocalizations.of(context)!.labelMonth,
+                      style: theme.textTheme.labelMedium),
                   Expanded(
                     child: ListWheelScrollView.useDelegate(
                       itemExtent: 40,
@@ -1585,7 +1593,9 @@ class _YearMonthPickerState extends State<_YearMonthPicker> {
                           final isSelected = month == _selectedMonth;
                           return Center(
                             child: Text(
-                              DateFormat.MMM().format(DateTime(2024, month)),
+                              DateFormat.MMM(
+                                      AppLocalizations.of(context)!.localeName)
+                                  .format(DateTime(2024, month)),
                               style: isSelected
                                   ? theme.textTheme.titleLarge?.copyWith(
                                       color: theme.colorScheme.primary,

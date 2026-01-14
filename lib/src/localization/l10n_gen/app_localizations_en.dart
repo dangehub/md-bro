@@ -327,6 +327,368 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imageDeleted => 'Image deleted';
 
   @override
+  String get filterStatus => 'Status';
+
+  @override
+  String get filterScheduledDate => 'Scheduled Date';
+
+  @override
+  String get filterDueDate => 'Due Date';
+
+  @override
+  String get filterTag => 'Tag';
+
+  @override
+  String get filterPath => 'Path';
+
+  @override
+  String get filterPriority => 'Priority';
+
+  @override
+  String get opAny => 'Any';
+
+  @override
+  String get opIs => 'Is';
+
+  @override
+  String get opIsNot => 'Is not';
+
+  @override
+  String get opIsBefore => 'Is before';
+
+  @override
+  String get opIsAfter => 'Is after';
+
+  @override
+  String get opIsToday => 'Is today';
+
+  @override
+  String get opIsBeforeToday => 'Is before today';
+
+  @override
+  String get opIsAfterToday => 'Is after today';
+
+  @override
+  String get opIsInNextDays => 'Is in next days';
+
+  @override
+  String get opIsInPrevDays => 'Is in previous days';
+
+  @override
+  String get opIsEmpty => 'Is empty';
+
+  @override
+  String get opIsNotEmpty => 'Is not empty';
+
+  @override
+  String get taskStatusAll => 'All';
+
+  @override
+  String get taskStatusTodo => 'To Do';
+
+  @override
+  String get taskStatusDone => 'Done';
+
+  @override
+  String get labelMatch => 'Match';
+
+  @override
+  String get labelAll => 'All';
+
+  @override
+  String get labelAny => 'Any';
+
+  @override
+  String get labelConditions => 'conditions';
+
+  @override
+  String get btnAddCondition => 'Add condition';
+
+  @override
+  String get hintDays => 'Days';
+
+  @override
+  String get hintTag => 'Tag';
+
+  @override
+  String get hintPath => 'Path';
+
+  @override
+  String get hintPriority => '1-5';
+
+  @override
+  String get btnSelectDate => 'Select Date';
+
+  @override
+  String get msgEnterFilterName => 'Please enter a filter name';
+
+  @override
+  String get titleNewFilter => 'New Filter';
+
+  @override
+  String get titleEditFilter => 'Edit Filter';
+
+  @override
+  String get labelFilterName => 'Filter Name';
+
+  @override
+  String get headerFilterConditions => 'Filter Conditions';
+
+  @override
+  String get memosToday => 'Today';
+
+  @override
+  String get memosYesterday => 'Yesterday';
+
+  @override
+  String get btnSelectMonth => 'Select Month';
+
+  @override
+  String get labelYear => 'Year';
+
+  @override
+  String get labelMonth => 'Month';
+
+  @override
+  String get labelInheritDate => 'Inherit Date from Filename';
+
+  @override
+  String get labelTagsInclude => 'Tags (Include)';
+
+  @override
+  String get labelTagsExclude => 'Excluded Tags';
+
+  @override
+  String get hintEnterTag => 'Enter tag and submit';
+
+  @override
+  String get labelPathContains => 'Path Contains';
+
+  @override
+  String get hintPathExample => 'e.g. Work/Projects';
+
+  @override
+  String get labelGroupBy => 'Group By';
+
+  @override
+  String get groupNone => 'None';
+
+  @override
+  String get groupDueDate => 'Due Date';
+
+  @override
+  String get groupScheduledDate => 'Scheduled Date';
+
+  @override
+  String get groupFilePath => 'File Path';
+
+  @override
+  String get groupPriority => 'Priority';
+
+  @override
+  String get groupStatus => 'Status';
+
+  @override
+  String get labelSortRules => 'Sorting Rules';
+
+  @override
+  String get sortAsc => 'Ascending';
+
+  @override
+  String get sortDesc => 'Descending';
+
+  @override
+  String get sortAlphabetical => 'Alphabetical';
+
+  @override
+  String get sortCreatedDate => 'Created Date';
+
+  @override
+  String get btnAddSortRule => 'Add Sort Rule';
+
+  @override
+  String get headerNewTaskDefaults => 'New Task Defaults';
+
+  @override
+  String get labelDefaultTags => 'Default Tags';
+
+  @override
+  String get hintDefaultTag => 'Enter default tag';
+
+  @override
+  String get labelDefaultDueDate => 'Default Due Date';
+
+  @override
+  String get labelOffsetDays => 'Offset Days (0=Today)';
+
+  @override
+  String get labelSpecificDate => 'Specific Date';
+
+  @override
+  String get datePresetNone => 'None';
+
+  @override
+  String get datePresetToday => 'Today';
+
+  @override
+  String get datePresetTomorrow => 'Tomorrow';
+
+  @override
+  String get datePresetTodayPlusDays => 'Today + Days';
+
+  @override
+  String get actionKeep => 'Keep';
+
+  @override
+  String get actionDelete => 'Delete';
+
+  @override
+  String get actionArchive => 'Archive';
+
+  @override
+  String get titleManageFilters => 'Manage Filters';
+
+  @override
+  String get labelWidgetDisplay => 'Widget Display';
+
+  @override
+  String get labelDefault => 'Default';
+
+  @override
+  String confirmDeleteFilter(String name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String get titleDeleteFilter => 'Delete Filter';
+
+  @override
+  String get titleSelectWidgetFilter => 'Select Widget Filter';
+
+  @override
+  String get labelCompletionAction => 'Completion Action';
+
+  @override
+  String get headerTaskStatus => 'Task Status';
+
+  @override
+  String get labelTask => 'Task';
+
+  @override
+  String get labelTaskDescription => 'Task description';
+
+  @override
+  String get hintEnterTask => 'Enter your task here';
+
+  @override
+  String get labelTags => 'Tags';
+
+  @override
+  String get msgNoTagsAvailable => 'No tags available';
+
+  @override
+  String get headerPlanning => 'Planning';
+
+  @override
+  String get labelPriority => 'Priority';
+
+  @override
+  String get labelRecurrence => 'Recurrence';
+
+  @override
+  String get labelDue => 'Due';
+
+  @override
+  String get labelScheduled => 'Scheduled';
+
+  @override
+  String get labelStart => 'Start';
+
+  @override
+  String get headerNotifications => 'Notifications';
+
+  @override
+  String get labelScheduledNotification => 'Scheduled notification';
+
+  @override
+  String get headerStatusMetadata => 'Status & metadata';
+
+  @override
+  String get labelStatus => 'Status';
+
+  @override
+  String get labelCreated => 'Created';
+
+  @override
+  String get labelDone => 'Done';
+
+  @override
+  String get labelCancelled => 'Cancelled';
+
+  @override
+  String get priorityLowest => 'Lowest';
+
+  @override
+  String get priorityLow => 'Low';
+
+  @override
+  String get priorityNormal => 'Normal';
+
+  @override
+  String get priorityMedium => 'Medium';
+
+  @override
+  String get priorityHigh => 'High';
+
+  @override
+  String get priorityHighest => 'Highest';
+
+  @override
+  String get taskStatusInprogress => 'In Progress';
+
+  @override
+  String get taskStatusCancelled => 'Cancelled';
+
+  @override
+  String get recurrenceNone => 'None';
+
+  @override
+  String get recurrenceDaily => 'Every day';
+
+  @override
+  String get recurrenceWeekly => 'Every week';
+
+  @override
+  String get recurrenceMonthly => 'Every month';
+
+  @override
+  String get recurrenceYearly => 'Every year';
+
+  @override
+  String get recurrenceWeekday => 'Every weekday';
+
+  @override
+  String get recurrenceMonday => 'Every Monday';
+
+  @override
+  String get recurrenceTuesday => 'Every Tuesday';
+
+  @override
+  String get recurrenceWednesday => 'Every Wednesday';
+
+  @override
+  String get recurrenceThursday => 'Every Thursday';
+
+  @override
+  String get recurrenceFriday => 'Every Friday';
+
+  @override
+  String get recurrenceSaturday => 'Every Saturday';
+
+  @override
+  String get recurrenceSunday => 'Every Sunday';
+
+  @override
   String deleteFailed(Object error) {
     return 'Failed to delete: $error';
   }

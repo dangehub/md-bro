@@ -7,6 +7,7 @@ import 'package:obsi/src/core/utils.dart';
 import 'package:obsi/src/screens/settings/settings_controller.dart';
 import 'package:obsi/src/core/tasks/task.dart';
 import 'package:obsi/src/screens/task_editor/cubit/task_editor_cubit.dart';
+import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
 //import 'package:url_launcher/url_launcher.dart';
 
 class TaskEditor extends StatefulWidget {
@@ -55,16 +56,18 @@ class _TaskEditorState extends State<TaskEditor> {
                       _buildSection(
                         context,
                         icon: Icons.description_outlined,
-                        title: 'Task',
+                        title: AppLocalizations.of(context)!.labelTask,
                         children: [
                           TextFormField(
                             keyboardType: TextInputType.multiline,
                             maxLines: null,
                             initialValue: state.task?.description ?? '',
-                            decoration: const InputDecoration(
-                              hintText: 'Enter your task here',
-                              labelText: 'Task description',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              hintText:
+                                  AppLocalizations.of(context)!.hintEnterTask,
+                              labelText: AppLocalizations.of(context)!
+                                  .labelTaskDescription,
+                              border: const OutlineInputBorder(),
                             ),
                             onChanged: (value) {
                               context
@@ -76,9 +79,9 @@ class _TaskEditorState extends State<TaskEditor> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Tags',
-                                style: TextStyle(
+                              Text(
+                                AppLocalizations.of(context)!.labelTags,
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -94,13 +97,19 @@ class _TaskEditorState extends State<TaskEditor> {
                       _buildSection(
                         context,
                         icon: Icons.event_note_outlined,
-                        title: 'Planning',
+                        title: AppLocalizations.of(context)!.headerPlanning,
                         children: [
                           _buildLabeledRow(
-                            "Priority:",
+                            "${AppLocalizations.of(context)!.labelPriority}:",
                             DropdownButton<TaskPriority>(
                               isExpanded: true,
-                              items: getEnumList(TaskPriority.values),
+                              items: TaskPriority.values
+                                  .map((e) => DropdownMenuItem(
+                                        value: e,
+                                        child:
+                                            Text(_getPriorityName(context, e)),
+                                      ))
+                                  .toList(),
                               value: _taskPriority,
                               onChanged: (value) {
                                 if (value == null) return;
@@ -113,11 +122,11 @@ class _TaskEditorState extends State<TaskEditor> {
                             ),
                           ),
                           _buildLabeledRow(
-                            "${MarkdownTaskMarkers.recurringDateMarker} Recurrence:",
+                            "${MarkdownTaskMarkers.recurringDateMarker} ${AppLocalizations.of(context)!.labelRecurrence}:",
                             _buildRecurrenceControl(context, state),
                           ),
                           _buildLabeledRow(
-                            "${MarkdownTaskMarkers.dueDateMarker} Due:",
+                            "${MarkdownTaskMarkers.dueDateMarker} ${AppLocalizations.of(context)!.labelDue}:",
                             Row(children: [
                               addDateTimePicker(
                                   _dueDate, state.task?.due, context, (date) {
@@ -135,7 +144,7 @@ class _TaskEditorState extends State<TaskEditor> {
                             ]),
                           ),
                           _buildLabeledRow(
-                            "${MarkdownTaskMarkers.scheduledDateMarker} Scheduled:",
+                            "${MarkdownTaskMarkers.scheduledDateMarker} ${AppLocalizations.of(context)!.labelScheduled}:",
                             Row(children: [
                               addDateTimePicker(_scheduledDate,
                                   state.task?.scheduled, context, (date) {
@@ -153,7 +162,7 @@ class _TaskEditorState extends State<TaskEditor> {
                             ]),
                           ),
                           _buildLabeledRow(
-                            "${MarkdownTaskMarkers.startDateMarker} Start:",
+                            "${MarkdownTaskMarkers.startDateMarker} ${AppLocalizations.of(context)!.labelStart}:",
                             Row(children: [
                               addDateTimePicker(
                                   _startDate, state.task?.start, context,
@@ -178,10 +187,11 @@ class _TaskEditorState extends State<TaskEditor> {
                       _buildSection(
                         context,
                         icon: Icons.notifications_outlined,
-                        title: 'Notifications',
+                        title:
+                            AppLocalizations.of(context)!.headerNotifications,
                         children: [
                           _buildLabeledRow(
-                            "Scheduled notification:",
+                            "${AppLocalizations.of(context)!.labelScheduledNotification}:",
                             Row(children: [
                               addDateTimePicker(
                                 _scheduledTime,
@@ -212,20 +222,19 @@ class _TaskEditorState extends State<TaskEditor> {
                       _buildSection(
                         context,
                         icon: Icons.info_outline,
-                        title: 'Status & metadata',
+                        title:
+                            AppLocalizations.of(context)!.headerStatusMetadata,
                         children: [
                           _buildLabeledRow(
-                            "Status:",
+                            "${AppLocalizations.of(context)!.labelStatus}:",
                             DropdownButton<TaskStatus>(
                               isExpanded: true,
-                              items: const [
-                                DropdownMenuItem<TaskStatus>(
-                                    value: TaskStatus.todo,
-                                    child: Text('todo')),
-                                DropdownMenuItem<TaskStatus>(
-                                    value: TaskStatus.done,
-                                    child: Text('done')),
-                              ],
+                              items: TaskStatus.values
+                                  .map((e) => DropdownMenuItem(
+                                        value: e,
+                                        child: Text(_getStatusName(context, e)),
+                                      ))
+                                  .toList(),
                               value: _taskStatus,
                               onChanged: (value) {
                                 if (value == null) return;
@@ -238,7 +247,7 @@ class _TaskEditorState extends State<TaskEditor> {
                             ),
                           ),
                           _buildLabeledRow(
-                            "${MarkdownTaskMarkers.createdDateMarker} Created:",
+                            "${MarkdownTaskMarkers.createdDateMarker} ${AppLocalizations.of(context)!.labelCreated}:",
                             Row(children: [
                               addDateTimePicker(
                                   _createdDate, state.task?.created, context,
@@ -257,7 +266,7 @@ class _TaskEditorState extends State<TaskEditor> {
                             ]),
                           ),
                           _buildLabeledRow(
-                            "${MarkdownTaskMarkers.doneDateMarker} Done:",
+                            "${MarkdownTaskMarkers.doneDateMarker} ${AppLocalizations.of(context)!.labelDone}:",
                             Row(children: [
                               addDateTimePicker(
                                   _doneDate, state.task?.done, context, (date) {
@@ -275,7 +284,7 @@ class _TaskEditorState extends State<TaskEditor> {
                             ]),
                           ),
                           _buildLabeledRow(
-                            "${MarkdownTaskMarkers.cancelledDateMarker} Cancelled:",
+                            "${MarkdownTaskMarkers.cancelledDateMarker} ${AppLocalizations.of(context)!.labelCancelled}:",
                             Row(children: [
                               addDateTimePicker(_cancelledDate,
                                   state.task?.cancelled, context, (date) {
@@ -339,7 +348,7 @@ class _TaskEditorState extends State<TaskEditor> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.save_outlined),
-                        label: const Text('Save'),
+                        label: Text(AppLocalizations.of(context)!.save),
                         onPressed: () {
                           context.read<TaskEditorCubit>().saveTask(context);
                         },
@@ -357,13 +366,36 @@ class _TaskEditorState extends State<TaskEditor> {
     );
   }
 
-  List<DropdownMenuItem<T>> getEnumList<T extends Enum>(List<T> values) {
-    return values
-        .map((e) => DropdownMenuItem<T>(
-              value: e,
-              child: Text(e.toString().split(".")[1]),
-            ))
-        .toList();
+  String _getPriorityName(BuildContext context, TaskPriority p) {
+    var tr = AppLocalizations.of(context)!;
+    switch (p) {
+      case TaskPriority.lowest:
+        return tr.priorityLowest;
+      case TaskPriority.low:
+        return tr.priorityLow;
+      case TaskPriority.normal:
+        return tr.priorityNormal;
+      case TaskPriority.medium:
+        return tr.priorityMedium;
+      case TaskPriority.high:
+        return tr.priorityHigh;
+      case TaskPriority.highest:
+        return tr.priorityHighest;
+    }
+  }
+
+  String _getStatusName(BuildContext context, TaskStatus s) {
+    var tr = AppLocalizations.of(context)!;
+    switch (s) {
+      case TaskStatus.todo:
+        return tr.taskStatusTodo;
+      case TaskStatus.done:
+        return tr.taskStatusDone;
+      case TaskStatus.inprogress:
+        return tr.taskStatusInprogress;
+      case TaskStatus.cancelled:
+        return tr.taskStatusCancelled;
+    }
   }
 
   void _init(Task? task) {
@@ -386,6 +418,41 @@ class _TaskEditorState extends State<TaskEditor> {
       formatedDate = DateFormat(dateTemplate).format(date);
     }
     return formatedDate;
+  }
+
+  String _getRecurrenceName(BuildContext context, String rule) {
+    var tr = AppLocalizations.of(context)!;
+    switch (rule) {
+      case 'None':
+        return tr.recurrenceNone;
+      case 'every day':
+        return tr.recurrenceDaily;
+      case 'every week':
+        return tr.recurrenceWeekly;
+      case 'every month':
+        return tr.recurrenceMonthly;
+      case 'every year':
+        return tr.recurrenceYearly;
+      case 'every weekday':
+        return tr.recurrenceWeekday;
+      case 'every Monday':
+        return tr.recurrenceMonday;
+      case 'every Tuesday':
+        return tr.recurrenceTuesday;
+      case 'every Wednesday':
+        return tr.recurrenceWednesday;
+      case 'every Thursday':
+        return tr.recurrenceThursday;
+      case 'every Friday':
+        return tr.recurrenceFriday;
+      case 'every Saturday':
+        return tr.recurrenceSaturday;
+      case 'every Sunday':
+        return tr.recurrenceSunday;
+      default:
+        // Attempt to handle case variations or just return rule
+        return rule;
+    }
   }
 
   String _initTime(DateTime? dateTime, bool? scheduledTime) {
@@ -420,9 +487,9 @@ class _TaskEditorState extends State<TaskEditor> {
     final currentTaskTags = cubit.getCurrentTaskTags();
 
     if (allTags.isEmpty) {
-      return const Text(
-        'No tags available',
-        style: TextStyle(color: Colors.grey),
+      return Text(
+        AppLocalizations.of(context)!.msgNoTagsAvailable,
+        style: const TextStyle(color: Colors.grey),
       );
     }
 
@@ -500,7 +567,8 @@ class _TaskEditorState extends State<TaskEditor> {
         child: DropdownButton<String>(
           isExpanded: true,
           items: options
-              .map((o) => DropdownMenuItem<String>(value: o, child: Text(o)))
+              .map((o) => DropdownMenuItem<String>(
+                  value: o, child: Text(_getRecurrenceName(context, o))))
               .toList(),
           value: dropdownValue,
           onChanged: (val) {

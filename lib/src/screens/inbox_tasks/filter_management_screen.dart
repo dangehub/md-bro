@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:obsi/src/core/filter_list.dart';
 import 'package:obsi/src/screens/settings/settings_controller.dart';
 import 'package:obsi/src/screens/inbox_tasks/filter_editor_screen.dart';
+import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
 
 class FilterManagementScreen extends StatefulWidget {
   const FilterManagementScreen({Key? key}) : super(key: key);
@@ -51,16 +52,18 @@ class _FilterManagementScreenState extends State<FilterManagementScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除筛选'),
-        content: Text('确定要删除 "${filter.name}" 吗？'),
+        title: Text(AppLocalizations.of(context)!.titleDeleteFilter),
+        content: Text(
+            AppLocalizations.of(context)!.confirmDeleteFilter(filter.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.actionDelete,
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -87,7 +90,7 @@ class _FilterManagementScreenState extends State<FilterManagementScreen> {
       context: context,
       builder: (context) {
         return SimpleDialog(
-          title: const Text('选择小部件筛选器'),
+          title: Text(AppLocalizations.of(context)!.titleSelectWidgetFilter),
           children: _filters.map((f) {
             return SimpleDialogOption(
               onPressed: () => Navigator.pop(context, f.id),
@@ -110,7 +113,8 @@ class _FilterManagementScreenState extends State<FilterManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String widgetFilterName = "默认 (Default)";
+    String widgetFilterName =
+        "${AppLocalizations.of(context)!.labelDefault} (Default)";
     try {
       if (_widgetFilterId != null) {
         var f = _filters.firstWhere((element) => element.id == _widgetFilterId);
@@ -119,7 +123,8 @@ class _FilterManagementScreenState extends State<FilterManagementScreen> {
         var f = _filters.firstWhere((element) => element.id == 'filter_today',
             orElse: () =>
                 _filters.isNotEmpty ? _filters.first : FilterList.upcoming());
-        widgetFilterName = "${f.name} (默认)";
+        widgetFilterName =
+            "${f.name} (${AppLocalizations.of(context)!.labelDefault})";
       }
     } catch (e) {
       // quiet
@@ -127,12 +132,12 @@ class _FilterManagementScreenState extends State<FilterManagementScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('管理筛选列表'),
+        title: Text(AppLocalizations.of(context)!.titleManageFilters),
       ),
       body: Column(
         children: [
           ListTile(
-            title: const Text("桌面小部件显示"),
+            title: Text(AppLocalizations.of(context)!.labelWidgetDisplay),
             subtitle: Text(widgetFilterName),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: _selectWidgetFilter,

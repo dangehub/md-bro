@@ -668,6 +668,726 @@ abstract class AppLocalizations {
   /// **'Image deleted'**
   String get imageDeleted;
 
+  /// No description provided for @filterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get filterStatus;
+
+  /// No description provided for @filterScheduledDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Date'**
+  String get filterScheduledDate;
+
+  /// No description provided for @filterDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get filterDueDate;
+
+  /// No description provided for @filterTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get filterTag;
+
+  /// No description provided for @filterPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path'**
+  String get filterPath;
+
+  /// No description provided for @filterPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get filterPriority;
+
+  /// No description provided for @opAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get opAny;
+
+  /// No description provided for @opIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Is'**
+  String get opIs;
+
+  /// No description provided for @opIsNot.
+  ///
+  /// In en, this message translates to:
+  /// **'Is not'**
+  String get opIsNot;
+
+  /// No description provided for @opIsBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Is before'**
+  String get opIsBefore;
+
+  /// No description provided for @opIsAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Is after'**
+  String get opIsAfter;
+
+  /// No description provided for @opIsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Is today'**
+  String get opIsToday;
+
+  /// No description provided for @opIsBeforeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Is before today'**
+  String get opIsBeforeToday;
+
+  /// No description provided for @opIsAfterToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Is after today'**
+  String get opIsAfterToday;
+
+  /// No description provided for @opIsInNextDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Is in next days'**
+  String get opIsInNextDays;
+
+  /// No description provided for @opIsInPrevDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Is in previous days'**
+  String get opIsInPrevDays;
+
+  /// No description provided for @opIsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Is empty'**
+  String get opIsEmpty;
+
+  /// No description provided for @opIsNotEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Is not empty'**
+  String get opIsNotEmpty;
+
+  /// No description provided for @taskStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get taskStatusAll;
+
+  /// No description provided for @taskStatusTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'To Do'**
+  String get taskStatusTodo;
+
+  /// No description provided for @taskStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get taskStatusDone;
+
+  /// No description provided for @labelMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Match'**
+  String get labelMatch;
+
+  /// No description provided for @labelAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get labelAll;
+
+  /// No description provided for @labelAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get labelAny;
+
+  /// No description provided for @labelConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'conditions'**
+  String get labelConditions;
+
+  /// No description provided for @btnAddCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Add condition'**
+  String get btnAddCondition;
+
+  /// No description provided for @hintDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get hintDays;
+
+  /// No description provided for @hintTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get hintTag;
+
+  /// No description provided for @hintPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path'**
+  String get hintPath;
+
+  /// No description provided for @hintPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'1-5'**
+  String get hintPriority;
+
+  /// No description provided for @btnSelectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get btnSelectDate;
+
+  /// No description provided for @msgEnterFilterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a filter name'**
+  String get msgEnterFilterName;
+
+  /// No description provided for @titleNewFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'New Filter'**
+  String get titleNewFilter;
+
+  /// No description provided for @titleEditFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Filter'**
+  String get titleEditFilter;
+
+  /// No description provided for @labelFilterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Name'**
+  String get labelFilterName;
+
+  /// No description provided for @headerFilterConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Conditions'**
+  String get headerFilterConditions;
+
+  /// No description provided for @memosToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get memosToday;
+
+  /// No description provided for @memosYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get memosYesterday;
+
+  /// No description provided for @btnSelectMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Month'**
+  String get btnSelectMonth;
+
+  /// No description provided for @labelYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get labelYear;
+
+  /// No description provided for @labelMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get labelMonth;
+
+  /// No description provided for @labelInheritDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Inherit Date from Filename'**
+  String get labelInheritDate;
+
+  /// No description provided for @labelTagsInclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (Include)'**
+  String get labelTagsInclude;
+
+  /// No description provided for @labelTagsExclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded Tags'**
+  String get labelTagsExclude;
+
+  /// No description provided for @hintEnterTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter tag and submit'**
+  String get hintEnterTag;
+
+  /// No description provided for @labelPathContains.
+  ///
+  /// In en, this message translates to:
+  /// **'Path Contains'**
+  String get labelPathContains;
+
+  /// No description provided for @hintPathExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Work/Projects'**
+  String get hintPathExample;
+
+  /// No description provided for @labelGroupBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Group By'**
+  String get labelGroupBy;
+
+  /// No description provided for @groupNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get groupNone;
+
+  /// No description provided for @groupDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get groupDueDate;
+
+  /// No description provided for @groupScheduledDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Date'**
+  String get groupScheduledDate;
+
+  /// No description provided for @groupFilePath.
+  ///
+  /// In en, this message translates to:
+  /// **'File Path'**
+  String get groupFilePath;
+
+  /// No description provided for @groupPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get groupPriority;
+
+  /// No description provided for @groupStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get groupStatus;
+
+  /// No description provided for @labelSortRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorting Rules'**
+  String get labelSortRules;
+
+  /// No description provided for @sortAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get sortAsc;
+
+  /// No description provided for @sortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get sortDesc;
+
+  /// No description provided for @sortAlphabetical.
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical'**
+  String get sortAlphabetical;
+
+  /// No description provided for @sortCreatedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Created Date'**
+  String get sortCreatedDate;
+
+  /// No description provided for @btnAddSortRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Sort Rule'**
+  String get btnAddSortRule;
+
+  /// No description provided for @headerNewTaskDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'New Task Defaults'**
+  String get headerNewTaskDefaults;
+
+  /// No description provided for @labelDefaultTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Tags'**
+  String get labelDefaultTags;
+
+  /// No description provided for @hintDefaultTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter default tag'**
+  String get hintDefaultTag;
+
+  /// No description provided for @labelDefaultDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Due Date'**
+  String get labelDefaultDueDate;
+
+  /// No description provided for @labelOffsetDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Offset Days (0=Today)'**
+  String get labelOffsetDays;
+
+  /// No description provided for @labelSpecificDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific Date'**
+  String get labelSpecificDate;
+
+  /// No description provided for @datePresetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get datePresetNone;
+
+  /// No description provided for @datePresetToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get datePresetToday;
+
+  /// No description provided for @datePresetTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get datePresetTomorrow;
+
+  /// No description provided for @datePresetTodayPlusDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Today + Days'**
+  String get datePresetTodayPlusDays;
+
+  /// No description provided for @actionKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get actionKeep;
+
+  /// No description provided for @actionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get actionDelete;
+
+  /// No description provided for @actionArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get actionArchive;
+
+  /// No description provided for @titleManageFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Filters'**
+  String get titleManageFilters;
+
+  /// No description provided for @labelWidgetDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Display'**
+  String get labelWidgetDisplay;
+
+  /// No description provided for @labelDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get labelDefault;
+
+  /// No description provided for @confirmDeleteFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String confirmDeleteFilter(String name);
+
+  /// No description provided for @titleDeleteFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Filter'**
+  String get titleDeleteFilter;
+
+  /// No description provided for @titleSelectWidgetFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Widget Filter'**
+  String get titleSelectWidgetFilter;
+
+  /// No description provided for @labelCompletionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion Action'**
+  String get labelCompletionAction;
+
+  /// No description provided for @headerTaskStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Status'**
+  String get headerTaskStatus;
+
+  /// No description provided for @labelTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get labelTask;
+
+  /// No description provided for @labelTaskDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Task description'**
+  String get labelTaskDescription;
+
+  /// No description provided for @hintEnterTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your task here'**
+  String get hintEnterTask;
+
+  /// No description provided for @labelTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get labelTags;
+
+  /// No description provided for @msgNoTagsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags available'**
+  String get msgNoTagsAvailable;
+
+  /// No description provided for @headerPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get headerPlanning;
+
+  /// No description provided for @labelPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get labelPriority;
+
+  /// No description provided for @labelRecurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence'**
+  String get labelRecurrence;
+
+  /// No description provided for @labelDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get labelDue;
+
+  /// No description provided for @labelScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get labelScheduled;
+
+  /// No description provided for @labelStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get labelStart;
+
+  /// No description provided for @headerNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get headerNotifications;
+
+  /// No description provided for @labelScheduledNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled notification'**
+  String get labelScheduledNotification;
+
+  /// No description provided for @headerStatusMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Status & metadata'**
+  String get headerStatusMetadata;
+
+  /// No description provided for @labelStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get labelStatus;
+
+  /// No description provided for @labelCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get labelCreated;
+
+  /// No description provided for @labelDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get labelDone;
+
+  /// No description provided for @labelCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get labelCancelled;
+
+  /// No description provided for @priorityLowest.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest'**
+  String get priorityLowest;
+
+  /// No description provided for @priorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get priorityLow;
+
+  /// No description provided for @priorityNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get priorityNormal;
+
+  /// No description provided for @priorityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get priorityMedium;
+
+  /// No description provided for @priorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get priorityHigh;
+
+  /// No description provided for @priorityHighest.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest'**
+  String get priorityHighest;
+
+  /// No description provided for @taskStatusInprogress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get taskStatusInprogress;
+
+  /// No description provided for @taskStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get taskStatusCancelled;
+
+  /// No description provided for @recurrenceNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get recurrenceNone;
+
+  /// No description provided for @recurrenceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get recurrenceDaily;
+
+  /// No description provided for @recurrenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every week'**
+  String get recurrenceWeekly;
+
+  /// No description provided for @recurrenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get recurrenceMonthly;
+
+  /// No description provided for @recurrenceYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every year'**
+  String get recurrenceYearly;
+
+  /// No description provided for @recurrenceWeekday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every weekday'**
+  String get recurrenceWeekday;
+
+  /// No description provided for @recurrenceMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Monday'**
+  String get recurrenceMonday;
+
+  /// No description provided for @recurrenceTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Tuesday'**
+  String get recurrenceTuesday;
+
+  /// No description provided for @recurrenceWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Wednesday'**
+  String get recurrenceWednesday;
+
+  /// No description provided for @recurrenceThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Thursday'**
+  String get recurrenceThursday;
+
+  /// No description provided for @recurrenceFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Friday'**
+  String get recurrenceFriday;
+
+  /// No description provided for @recurrenceSaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Saturday'**
+  String get recurrenceSaturday;
+
+  /// No description provided for @recurrenceSunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Sunday'**
+  String get recurrenceSunday;
+
   /// No description provided for @deleteFailed.
   ///
   /// In en, this message translates to:

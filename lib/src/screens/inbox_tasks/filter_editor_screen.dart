@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:obsi/src/core/filter_list.dart';
 import 'package:obsi/src/core/task_filter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
+import 'package:obsi/src/screens/inbox_tasks/filter_localization_helpers.dart';
 
 class FilterEditorScreen extends StatefulWidget {
   final FilterList? existingFilter; // If null, creating new
@@ -13,7 +15,8 @@ class FilterEditorScreen extends StatefulWidget {
   State<FilterEditorScreen> createState() => _FilterEditorScreenState();
 }
 
-class _FilterEditorScreenState extends State<FilterEditorScreen> {
+class _FilterEditorScreenState extends State<FilterEditorScreen>
+    with FilterLocalizationHelpers {
   late TextEditingController _nameController;
   late TextEditingController _pathController;
   late TextEditingController _tagController;
@@ -237,21 +240,20 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           children: [
             Row(
               children: [
-                const Text('Match '),
+                Text(AppLocalizations.of(context)!.labelMatch),
                 DropdownButton<ConditionCombineMode>(
                   value: group.mode,
                   items: ConditionCombineMode.values
                       .map((m) => DropdownMenuItem(
                             value: m,
-                            child: Text(
-                                m == ConditionCombineMode.all ? 'ALL' : 'ANY'),
+                            child: Text(getCombineModeName(context, m)),
                           ))
                       .toList(),
                   onChanged: (val) {
                     if (val != null) _setGroupMode(groupIndex, val);
                   },
                 ),
-                const Text(' conditions'),
+                Text(' ${AppLocalizations.of(context)!.labelConditions}'),
                 const Spacer(),
                 IconButton(
                   onPressed: () => _removeConditionGroup(groupIndex),
@@ -267,7 +269,7 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
             TextButton.icon(
               onPressed: () => _addConditionToGroup(groupIndex),
               icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add condition'),
+              label: Text(AppLocalizations.of(context)!.btnAddCondition),
             ),
           ],
         ),
@@ -287,7 +289,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           DropdownButton<FilterField>(
             value: cond.field,
             items: FilterField.values
-                .map((f) => DropdownMenuItem(value: f, child: Text(f.name)))
+                .map((f) => DropdownMenuItem(
+                    value: f, child: Text(getFilterFieldName(context, f))))
                 .toList(),
             onChanged: (val) {
               if (val != null) {
@@ -302,8 +305,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
             DropdownButton<DateOperator>(
               value: cond.dateOperator,
               items: DateOperator.values
-                  .map(
-                      (op) => DropdownMenuItem(value: op, child: Text(op.name)))
+                  .map((op) => DropdownMenuItem(
+                      value: op, child: Text(getDateOperatorName(context, op))))
                   .toList(),
               onChanged: (val) {
                 if (val != null) {
@@ -324,7 +327,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
             DropdownButton<StatusFilterType>(
               value: cond.statusValue ?? StatusFilterType.all,
               items: StatusFilterType.values
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s.name)))
+                  .map((s) => DropdownMenuItem(
+                      value: s, child: Text(getStatusFilterName(context, s))))
                   .toList(),
               onChanged: (val) {
                 if (val != null) {
@@ -342,7 +346,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
               width: 60,
               child: TextField(
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(hintText: 'Days'),
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.hintDays),
                 controller: TextEditingController(
                     text: cond.intValue?.toString() ?? '7'),
                 onChanged: (val) {
@@ -386,14 +391,15 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
               },
               child: Text(cond.dateValue != null
                   ? DateFormat('yyyy-MM-dd').format(cond.dateValue!)
-                  : 'Select Date'),
+                  : AppLocalizations.of(context)!.btnSelectDate),
             ),
           // Tag input
           if (cond.field == FilterField.tag)
             SizedBox(
               width: 100,
               child: TextField(
-                decoration: const InputDecoration(hintText: 'Tag'),
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.hintTag),
                 controller: TextEditingController(text: cond.stringValue ?? ''),
                 onChanged: (val) {
                   _updateConditionInGroup(
@@ -411,7 +417,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
             SizedBox(
               width: 120,
               child: TextField(
-                decoration: const InputDecoration(hintText: 'Path'),
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.hintPath),
                 controller: TextEditingController(text: cond.stringValue ?? ''),
                 onChanged: (val) {
                   _updateConditionInGroup(
@@ -430,7 +437,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
               width: 60,
               child: TextField(
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(hintText: '1-5'),
+                decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.hintPriority),
                 controller: TextEditingController(
                     text: cond.intValue?.toString() ?? ''),
                 onChanged: (val) {
@@ -458,7 +466,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
   void _save() {
     if (_nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入筛选名称')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.msgEnterFilterName)),
       );
       return;
     }
@@ -523,7 +532,9 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existingFilter == null ? '新建筛选' : '编辑筛选'),
+        title: Text(widget.existingFilter == null
+            ? AppLocalizations.of(context)!.titleNewFilter
+            : AppLocalizations.of(context)!.titleEditFilter),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -537,8 +548,9 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           // Name
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
-                labelText: '筛选名称', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.labelFilterName,
+                border: const OutlineInputBorder()),
           ),
           const SizedBox(height: 16),
 
@@ -546,12 +558,13 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           const Divider(height: 32),
 
           // Status Filter
-          const Text('任务状态', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.headerTaskStatus,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           Wrap(
             spacing: 10,
             children: StatusFilterType.values.map((type) {
               return ChoiceChip(
-                label: Text(type.toString().split('.').last.toUpperCase()),
+                label: Text(getStatusFilterName(context, type)),
                 selected: _statusFilter == type,
                 onSelected: (selected) {
                   if (selected) setState(() => _statusFilter = type);
@@ -570,19 +583,17 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
                 children: [
                   Row(
                     children: [
-                      const Text('Filter Conditions',
-                          style: TextStyle(
+                      Text(AppLocalizations.of(context)!.headerFilterConditions,
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16)),
                       const Spacer(),
-                      const Text('Match: '),
+                      Text('${AppLocalizations.of(context)!.labelMatch}: '),
                       DropdownButton<ConditionCombineMode>(
                         value: _groupMode,
                         items: ConditionCombineMode.values
                             .map((m) => DropdownMenuItem(
                                   value: m,
-                                  child: Text(m == ConditionCombineMode.all
-                                      ? 'ALL'
-                                      : 'ANY'),
+                                  child: Text(getCombineModeName(context, m)),
                                 ))
                             .toList(),
                         onChanged: (val) {
@@ -608,14 +619,14 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           ),
           const SizedBox(height: 16),
           CheckboxListTile(
-              title: const Text("Inherit Date from Filename"),
+              title: Text(AppLocalizations.of(context)!.labelInheritDate),
               value: _inheritDate,
               onChanged: (val) => setState(() => _inheritDate = val!)),
           const Divider(height: 32),
 
           // Tags
-          const Text('Tags (Include)',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.labelTagsInclude,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           Wrap(
             spacing: 8,
             children: _tags
@@ -630,7 +641,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
               Expanded(
                 child: TextField(
                   controller: _tagController,
-                  decoration: const InputDecoration(hintText: '输入标签后点击添加'),
+                  decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.hintEnterTag),
                   onSubmitted: _addTag,
                 ),
               ),
@@ -642,7 +654,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           const SizedBox(height: 16),
 
           // Excluded Tags
-          const Text('排除标签', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.labelTagsExclude,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           Wrap(
             spacing: 8,
             children: _excludedTags
@@ -659,7 +672,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
               Expanded(
                 child: TextField(
                   controller: _excludedTagController,
-                  decoration: const InputDecoration(hintText: '输入排除标签后点击添加'),
+                  decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.hintEnterTag),
                   onSubmitted: _addExcludedTag,
                 ),
               ),
@@ -671,34 +685,25 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           const Divider(height: 32),
 
           // Path
-          const Text('文件路径包含', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.labelPathContains,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           TextField(
             controller: _pathController,
-            decoration: const InputDecoration(hintText: '例如: Work/Projects'),
+            decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.hintPathExample),
           ),
           const SizedBox(height: 50),
 
           // Group By
-          const Text('分组方式 (Group By)',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.labelGroupBy,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           DropdownButton<GroupByField>(
             isExpanded: true,
             value: _groupBy,
-            items: const [
-              DropdownMenuItem(
-                  value: GroupByField.none, child: Text('不分组 (None)')),
-              DropdownMenuItem(
-                  value: GroupByField.dueDate, child: Text('Due Date')),
-              DropdownMenuItem(
-                  value: GroupByField.scheduledDate,
-                  child: Text('Scheduled Date')),
-              DropdownMenuItem(
-                  value: GroupByField.filePath, child: Text('File Path')),
-              DropdownMenuItem(
-                  value: GroupByField.priority, child: Text('Priority')),
-              DropdownMenuItem(
-                  value: GroupByField.status, child: Text('Status')),
-            ],
+            items: GroupByField.values
+                .map((f) => DropdownMenuItem(
+                    value: f, child: Text(getGroupByFieldName(context, f))))
+                .toList(),
             onChanged: (val) {
               if (val != null) setState(() => _groupBy = val);
             },
@@ -708,8 +713,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
 
           // Sorting Section
           const Divider(height: 32),
-          const Text('排序规则 (优先级从上到下)',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.labelSortRules,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           ReorderableListView(
             // Not a valid property for ReorderableListView in older Flutter?
@@ -742,25 +747,11 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
                         child: DropdownButton<SortField>(
                           isExpanded: true,
                           value: _sortRules[i].field,
-                          items: const [
-                            DropdownMenuItem(
-                                value: SortField.dueDate,
-                                child: Text('Due Date')),
-                            DropdownMenuItem(
-                                value: SortField.scheduledDate,
-                                child: Text('Scheduled Date')),
-                            DropdownMenuItem(
-                                value: SortField.priority,
-                                child: Text('Priority')),
-                            DropdownMenuItem(
-                                value: SortField.alphabetical,
-                                child: Text('Alphabetical')),
-                            DropdownMenuItem(
-                                value: SortField.createdDate,
-                                child: Text('Created Date')),
-                            DropdownMenuItem(
-                                value: SortField.status, child: Text('Status')),
-                          ],
+                          items: SortField.values
+                              .map((f) => DropdownMenuItem(
+                                  value: f,
+                                  child: Text(getSortFieldName(context, f))))
+                              .toList(),
                           onChanged: (val) {
                             if (val != null) {
                               setState(() {
@@ -776,14 +767,11 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
                       const SizedBox(width: 8),
                       DropdownButton<SortDirection>(
                         value: _sortRules[i].direction,
-                        items: const [
-                          DropdownMenuItem(
-                              value: SortDirection.ascending,
-                              child: Text('升序 (Asc)')),
-                          DropdownMenuItem(
-                              value: SortDirection.descending,
-                              child: Text('降序 (Desc)')),
-                        ],
+                        items: SortDirection.values
+                            .map((d) => DropdownMenuItem(
+                                value: d,
+                                child: Text(getSortDirectionName(context, d))))
+                            .toList(),
                         onChanged: (val) {
                           if (val != null) {
                             setState(() {
@@ -817,16 +805,16 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
               });
             },
             icon: const Icon(Icons.add),
-            label: const Text('添加排序规则'),
+            label: Text(AppLocalizations.of(context)!.btnAddSortRule),
           ),
 
           const Divider(height: 32),
-          const Text('新任务默认设置 (New Task Defaults)',
+          Text(AppLocalizations.of(context)!.headerNewTaskDefaults,
               style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
 
           // Default Tags
-          const Text('默认标签:'),
+          Text('${AppLocalizations.of(context)!.labelDefaultTags}:'),
           Wrap(
             spacing: 8,
             children: _defaultTags
@@ -841,7 +829,8 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
               Expanded(
                 child: TextField(
                   controller: _defaultTagController,
-                  decoration: const InputDecoration(hintText: '输入默认标签'),
+                  decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.hintDefaultTag),
                   onSubmitted: _addDefaultTag,
                 ),
               ),
@@ -853,12 +842,13 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           const SizedBox(height: 16),
 
           // Default Due DatePreset
-          const Text('默认截止日期 (Due Date):'),
+          Text('${AppLocalizations.of(context)!.labelDefaultDueDate}:'),
           DropdownButton<DatePresetType>(
               value: _defaultDueDate.type,
               isExpanded: true,
               items: DatePresetType.values
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
+                  .map((e) => DropdownMenuItem(
+                      value: e, child: Text(getDatePresetName(context, e))))
                   .toList(),
               onChanged: (val) {
                 if (val != null) {
@@ -944,14 +934,15 @@ class _FilterEditorScreenState extends State<FilterEditorScreen> {
           ),
 
           const Divider(height: 32),
-          const Text('完成任务时 (On Completion)',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.labelCompletionAction,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           DropdownButton<TaskCompletionAction>(
             value: _completionAction,
             isExpanded: true,
             items: TaskCompletionAction.values
-                .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
+                .map((e) => DropdownMenuItem(
+                    value: e, child: Text(getCompletionActionName(context, e))))
                 .toList(),
             onChanged: (val) {
               if (val != null) setState(() => _completionAction = val);
