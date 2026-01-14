@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:obsi/src/screens/introduction/onboarding.dart';
@@ -19,6 +20,8 @@ import 'src/screens/init/init.dart';
 import 'src/screens/notes_widget_config/notes_widget_config.dart';
 import 'src/screens/notes_widget_config/cubit/notes_widget_config_cubit.dart';
 import 'package:obsi/src/core/localization/custom_localizations.dart';
+import 'package:obsi/src/core/localization/fallback_localization_delegate.dart';
+import 'package:obsi/src/core/localization/proxy_localization_delegate.dart';
 
 class App extends StatefulWidget {
   final SettingsController settingsController;
@@ -191,10 +194,13 @@ class _AppState extends State<App> {
               restorationScopeId: 'app',
               localizationsDelegates: [
                 const CustomLocalizationsDelegate(),
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
+                ProxyLocalizationDelegate(AppLocalizations.delegate),
+                FallbackLocalizationDelegate<MaterialLocalizations>(
+                    GlobalMaterialLocalizations.delegate),
+                FallbackLocalizationDelegate<WidgetsLocalizations>(
+                    GlobalWidgetsLocalizations.delegate),
+                FallbackLocalizationDelegate<CupertinoLocalizations>(
+                    GlobalCupertinoLocalizations.delegate),
               ],
               supportedLocales: widget.settingsController.supportedLocales,
               locale: widget.settingsController.locale,

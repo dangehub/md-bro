@@ -25,10 +25,20 @@ class CustomLanguage {
   /// Create from JSON map
   factory CustomLanguage.fromJson(Map<String, dynamic> json,
       {String? filePath}) {
+    // Robust parsing of translations: filter out non-string values (like metadata objects)
+    final rawTranslations = json['translations'] as Map<String, dynamic>? ?? {};
+    final validTranslations = <String, String>{};
+
+    rawTranslations.forEach((key, value) {
+      if (value is String) {
+        validTranslations[key] = value;
+      }
+    });
+
     return CustomLanguage(
       locale: json['locale'] as String,
       name: json['name'] as String,
-      translations: Map<String, String>.from(json['translations'] as Map),
+      translations: validTranslations,
       filePath: filePath,
     );
   }
