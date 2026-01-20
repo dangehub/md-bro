@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:logger/logger.dart';
 import 'package:obsi/src/localization/l10n_gen/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:obsi/src/screens/introduction/onboarding.dart';
@@ -45,24 +46,60 @@ class _AppState extends State<App> {
   }
 
   void _setupIntentHandler() {
-    IntentService.instance.setIntentHandler((action, extras) {
-      _handleIntent(action, extras);
+    // Wait for the first frame to ensure Navigator is mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      IntentService.instance.setIntentHandler((action, extras) {
+        _handleIntent(action, extras);
+      });
     });
   }
 
-  void _handleIntent(String action, Map<String, dynamic>? extras) {
-    if (widget.settingsController.vaultDirectory == null) {
-      return;
+  void _handleIntent(String action, Map<String, dynamic>? extras,
+      {int retryCount = 0}) {
+    Logger().i(
+        'App._handleIntent called, action=$action, retry=$retryCount, vaultDirectory=${widget.settingsController.vaultDirectory}');
+
+    // Check if Navigator is ready
+    if (_navigatorKey.currentState == null) {
+      if (retryCount < 5) {
+        Logger().w(
+            'App._handleIntent: Navigator not ready, scheduling retry ${retryCount + 1}');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _handleIntent(action, extras, retryCount: retryCount + 1);
+        });
+        return;
+      } else {
+        Logger().e(
+            'App._handleIntent: Navigator still not ready after 5 retries. Giving up.');
+        return;
+      }
     }
 
     switch (action) {
       case 'add_task':
-        SettingsController.getInstance().hasActiveSubscription
-            ? _navigateToAddTask()
-            : _navigatorKey.currentState
-                ?.pushNamed(SubscriptionScreen.routeName);
+        // 快速添加任务：只需要 Settings 加载完成，不需要等待 TaskManager
+        if (widget.settingsController.vaultDirectory == null) {
+          Logger().w(
+              'App._handleIntent: vaultDirectory is null, skipping add_task');
+          return;
+        }
+        bool hasSub = SettingsController.getInstance().hasActiveSubscription;
+        bool navReady = _navigatorKey.currentState != null;
+        Logger().i(
+            'App._handleIntent: ready to navigate. Subscription=$hasSub, Navigator=$navReady');
+
+        if (hasSub) {
+          _navigateToAddTask();
+        } else {
+          Logger().i('App._handleIntent: No subscription, opening paywall');
+          _navigatorKey.currentState?.pushNamed(SubscriptionScreen.routeName);
+        }
         break;
       case 'open_task':
+        // 打开已有任务需要 TaskManager 扫描完成
+        if (widget.settingsController.vaultDirectory == null) {
+          return;
+        }
         if (extras != null && extras['task_json'] != null) {
           SettingsController.getInstance().hasActiveSubscription
               ? _navigateToOpenTask(extras['task_json'])
@@ -71,6 +108,9 @@ class _AppState extends State<App> {
         }
         break;
       case 'open_notes_widget_config':
+        if (widget.settingsController.vaultDirectory == null) {
+          return;
+        }
         _navigatorKey.currentState?.push(
           MaterialPageRoute(
             builder: (context) => BlocProvider(
@@ -84,9 +124,15 @@ class _AppState extends State<App> {
   }
 
   void _navigateToAddTask() {
+    Logger().i('App._navigateToAddTask called');
     var settings = SettingsController.getInstance();
     var resolvedTasksFile = VariableResolver.resolve(settings.tasksFile);
     var createTasksPath = p.join(settings.vaultDirectory!, resolvedTasksFile);
+
+    if (_navigatorKey.currentState == null) {
+      Logger().e('App._navigateToAddTask: NavigatorState is null!');
+      return;
+    }
 
     _navigatorKey.currentState?.push(
       MaterialPageRoute(
