@@ -397,17 +397,8 @@ class InboxTasks extends StatelessWidget with WidgetsBindingObserver {
         DateTime? scheduled = _resolveDatePreset(defaults?.scheduledDate);
         DateTime? due = _resolveDatePreset(defaults?.dueDate);
 
-        // Fallback for logic if no defaults set
-        bool defaultsSet = defaults?.scheduledDate != null &&
-            defaults!.scheduledDate!.type != DatePresetType.none;
-
-        if (!defaultsSet) {
-          if (currentFilter.id == 'inbox') {
-            scheduled = null;
-          } else {
-            scheduled = DateTime.now();
-          }
-        }
+        // No automatic scheduled date fallback - only apply filter defaults if set
+        // Created date is already filled in, which is sufficient
 
         // 3. Resolve Tags
         List<String> initialTags = [];
