@@ -190,6 +190,7 @@ class SettingsController with ChangeNotifier {
   DateTime? _subscriptionExpiry;
   DateTime? _reviewTasksReminderTime;
   DateTime? _reviewCompletedReminderTime;
+  String? _defaultReminderTime;
 
   // Expanded Sections State
   Map<String, bool> _expandedSections = {
@@ -231,6 +232,7 @@ class SettingsController with ChangeNotifier {
   DateTime? get subscriptionExpiry => _subscriptionExpiry;
   DateTime? get reviewTasksReminderTime => _reviewTasksReminderTime;
   DateTime? get reviewCompletedReminderTime => _reviewCompletedReminderTime;
+  String get defaultReminderTime => _defaultReminderTime ?? "09:00";
 
   // Memos settings getters
   String? get memosPath => _memosPath;
@@ -270,6 +272,7 @@ class SettingsController with ChangeNotifier {
     _reviewCompletedReminderTime =
         await _settingsService.reviewCompletedReminderTime();
     _activeFilterId = await _settingsService.activeFilterId();
+    _defaultReminderTime = await _settingsService.defaultReminderTime();
     _widgetFilterId = await _settingsService.widgetFilterId();
 
     var customFiltersJson = await _settingsService.customFilters();
@@ -624,6 +627,13 @@ class SettingsController with ChangeNotifier {
         'Review your completed tasks (you can remove this reminder in Settings)',
       );
     }
+  }
+
+  Future<void> updateDefaultReminderTime(String time) async {
+    if (time == _defaultReminderTime) return;
+    _defaultReminderTime = time;
+    notifyListeners();
+    await _settingsService.updateDefaultReminderTime(time);
   }
 
   Future<String> getAppVersion() async {

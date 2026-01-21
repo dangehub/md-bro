@@ -40,6 +40,7 @@ class SettingsService {
   static const String _reviewCompletedReminderTimeKey =
       "review_completed_reminder_time";
   static const String _activeFilterIdKey = "active_filter_id";
+  static const String _defaultReminderTimeKey = "default_reminder_time";
   static const String _customFiltersKey = "custom_filters";
 
   Future<ThemeMode> themeMode() async => ThemeMode.system;
@@ -625,5 +626,15 @@ class SettingsService {
     var sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setString(
         _expandedSectionsKey, json.encode(sections));
+  }
+
+  Future<String> defaultReminderTime() async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences.getString(_defaultReminderTimeKey) ?? "09:00";
+  }
+
+  Future<void> updateDefaultReminderTime(String time) async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString(_defaultReminderTimeKey, time);
   }
 }

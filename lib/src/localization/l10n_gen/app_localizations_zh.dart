@@ -861,4 +861,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String newTaskDefaults(Object name) {
     return '新任务默认设置 ($name)';
   }
+
+  @override
+  String get setDate => '设置日期';
+
+  @override
+  String get setTime => '设置时间';
 }

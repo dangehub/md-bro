@@ -476,6 +476,33 @@ class _SettingsViewState extends State<SettingsView> {
                   )
                 ]),
                 const SizedBox(height: 16),
+                Column(children: [
+                  Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text("Default Reminder Time")),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Text("Time: "),
+                      addDateTimePicker(
+                        Text(
+                          widget.controller.defaultReminderTime,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        DateFormat("HH:mm")
+                            .parse(widget.controller.defaultReminderTime),
+                        context,
+                        (time) {
+                          widget.controller.updateDefaultReminderTime(
+                              DateFormat("HH:mm").format(time));
+                          setState(() {});
+                        },
+                        timePicker: true,
+                      ),
+                    ],
+                  ),
+                ]),
+                const SizedBox(height: 16),
               ],
             ),
           ),

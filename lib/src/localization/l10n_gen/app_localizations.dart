@@ -1735,6 +1735,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New Task Defaults ({name})'**
   String newTaskDefaults(Object name);
+
+  /// No description provided for @setDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Date'**
+  String get setDate;
+
+  /// No description provided for @setTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Time'**
+  String get setTime;
 }
 
 class _AppLocalizationsDelegate

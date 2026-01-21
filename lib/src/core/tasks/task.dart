@@ -20,6 +20,7 @@ class Task implements Comparable<Task> {
   bool _isScheduledDateInferred;
   TaskSource? taskSource;
   String? _recurrenceRule = "";
+  DateTime? _reminder;
 
   bool get changed => _changed;
 
@@ -102,6 +103,12 @@ class Task implements Comparable<Task> {
     _isScheduledDateInferred = val;
   }
 
+  DateTime? get reminder => _reminder;
+  set reminder(DateTime? val) {
+    _changed = true;
+    _reminder = val;
+  }
+
   /// Parses hashtags from the description, stores them in tags array, and cleans description
   void _parseTags() {
     //   _tags.clear();
@@ -137,6 +144,7 @@ class Task implements Comparable<Task> {
     this.taskSource,
     recurranceRule,
     List<String>? tags,
+    DateTime? reminder,
   })  : _status = status,
         _priority = priority,
         _created = created,
@@ -147,7 +155,8 @@ class Task implements Comparable<Task> {
         _start = start,
         _scheduledTime = scheduledTime,
         _isScheduledDateInferred = isScheduledDateInferred,
-        _recurrenceRule = recurranceRule {
+        _recurrenceRule = recurranceRule,
+        _reminder = reminder {
     if (tags != null) {
       _tags.addAll(tags);
     }
@@ -182,6 +191,7 @@ class Task implements Comparable<Task> {
         _isScheduledDateInferred == other._isScheduledDateInferred &&
         //taskSource == other.taskSource &&
         _recurrenceRule == other._recurrenceRule &&
+        _reminder == other._reminder &&
         _tagsEqual(other._tags);
   }
 
@@ -211,6 +221,7 @@ class Task implements Comparable<Task> {
     taskSource = task.taskSource;
     // createdDateMarker = task.createdDateMarker;
     // scheduledDateMarker = task.scheduledDateMarker;
+    _reminder = task._reminder;
     _changed = true;
   }
 
@@ -229,6 +240,7 @@ class Task implements Comparable<Task> {
       // 'scheduledTime': _scheduledTime,
       'isScheduledDateInferred': _isScheduledDateInferred,
       'recurrenceRule': _recurrenceRule,
+      'reminder': _reminder?.toIso8601String(),
       'filePath': taskSource?.fileName,
       'fileOffset': taskSource?.offset.toString(),
       'fileNumber': taskSource?.fileNumber.toString(),
@@ -256,6 +268,8 @@ class Task implements Comparable<Task> {
       isScheduledDateInferred: json['isScheduledDateInferred'] ?? false,
       recurranceRule: json['recurrenceRule'],
       tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
+      reminder:
+          json['reminder'] != null ? DateTime.parse(json['reminder']) : null,
     );
 
     if (json['filePath'] != null) {

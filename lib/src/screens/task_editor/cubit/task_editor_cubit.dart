@@ -80,17 +80,15 @@ class TaskEditorCubit extends Cubit<TaskEditorState> {
     emit(TaskEditorInitial(_currentTask));
   }
 
-  void setScheduledNotificationDateTime(DateTime? date) {
+  void setReminder(DateTime? date) {
     if (date != null) {
       var notificationManager = NotificationManager.getInstance();
 
       notificationManager.requestExactAlarmPermission();
 
-      _currentTask.scheduled = date;
-      _currentTask.scheduledTime = true;
+      _currentTask.reminder = date;
     } else {
-      // null date in this method means - no scheduled time
-      _currentTask.scheduledTime = false;
+      _currentTask.reminder = null;
     }
     emit(TaskEditorInitial(_currentTask));
   }

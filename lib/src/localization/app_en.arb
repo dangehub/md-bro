@@ -379,5 +379,7 @@
       "placeholders": {
         "name": {}
       }
-    }
+    },
+  "setDate": "Set Date",
+  "setTime": "Set Time"
 }

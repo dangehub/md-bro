@@ -21,7 +21,8 @@ class _TaskEditorState extends State<TaskEditor> {
   TaskPriority _taskPriority = TaskPriority.normal;
   Text _dueDate = const Text("");
   Text _scheduledDate = const Text("");
-  Text _scheduledTime = const Text("");
+  Text _reminderDate = const Text("");
+  Text _reminderTime = const Text("");
   Text _startDate = const Text("");
   Text _createdDate = const Text("");
   Text _doneDate = const Text("");
@@ -192,28 +193,76 @@ class _TaskEditorState extends State<TaskEditor> {
                         children: [
                           _buildLabeledRow(
                             "${AppLocalizations.of(context)!.labelScheduledNotification}:",
-                            Row(children: [
-                              addDateTimePicker(
-                                _scheduledTime,
-                                state.task == null || !state.task!.scheduledTime
-                                    ? DateTime.now()
-                                    : state.task?.scheduled,
-                                context,
-                                (date) {
-                                  context
-                                      .read<TaskEditorCubit>()
-                                      .setScheduledNotificationDateTime(date);
-                                },
-                                timePicker: true,
-                              ),
-                              IconButton(
-                                  onPressed: () {
-                                    context
-                                        .read<TaskEditorCubit>()
-                                        .setScheduledNotificationDateTime(null);
-                                  },
-                                  icon: const Icon(Icons.clear_rounded))
-                            ]),
+                            SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(children: [
+                                  addDateTimePicker(
+                                    _reminderDate,
+                                    state.task?.reminder ?? DateTime.now(),
+                                    context,
+                                    (date) {
+                                      // Update Date part only
+                                      var currentReminder =
+                                          state.task?.reminder ??
+                                              DateTime.now();
+                                      // Use default time from settings if reminder was null
+                                      if (state.task?.reminder == null) {
+                                        // Parse default time
+                                        var defaultTimeStr =
+                                            SettingsController.getInstance()
+                                                .defaultReminderTime;
+                                        var defaultTime = DateFormat("HH:mm")
+                                            .parse(defaultTimeStr);
+                                        currentReminder = DateTime(
+                                            date.year,
+                                            date.month,
+                                            date.day,
+                                            defaultTime.hour,
+                                            defaultTime.minute);
+                                      } else {
+                                        currentReminder = DateTime(
+                                            date.year,
+                                            date.month,
+                                            date.day,
+                                            currentReminder.hour,
+                                            currentReminder.minute);
+                                      }
+                                      context
+                                          .read<TaskEditorCubit>()
+                                          .setReminder(currentReminder);
+                                    },
+                                    timePicker: false,
+                                  ),
+                                  const Text(":"),
+                                  addDateTimePicker(
+                                    _reminderTime,
+                                    state.task?.reminder ?? DateTime.now(),
+                                    context,
+                                    (time) {
+                                      // Update Time part only
+                                      var currentReminder =
+                                          state.task?.reminder ??
+                                              DateTime.now();
+                                      currentReminder = DateTime(
+                                          currentReminder.year,
+                                          currentReminder.month,
+                                          currentReminder.day,
+                                          time.hour,
+                                          time.minute);
+                                      context
+                                          .read<TaskEditorCubit>()
+                                          .setReminder(currentReminder);
+                                    },
+                                    timePicker: true,
+                                  ),
+                                  IconButton(
+                                      onPressed: () {
+                                        context
+                                            .read<TaskEditorCubit>()
+                                            .setReminder(null);
+                                      },
+                                      icon: const Icon(Icons.clear_rounded))
+                                ])),
                           ),
                         ],
                       ),
@@ -402,7 +451,10 @@ class _TaskEditorState extends State<TaskEditor> {
     _taskPriority = task?.priority ?? TaskPriority.normal;
     _dueDate = Text(_initDate(task?.due));
     _scheduledDate = Text(_initDate(task?.scheduled));
-    _scheduledTime = Text(_initTime(task?.scheduled, task?.scheduledTime));
+    _reminderDate =
+        Text(_initReminderDate(task?.reminder, AppLocalizations.of(context)!));
+    _reminderTime =
+        Text(_initReminderTime(task?.reminder, AppLocalizations.of(context)!));
     _startDate = Text(_initDate(task?.start));
     _createdDate = Text(_initDate(task?.created));
     _doneDate = Text(_initDate(task?.done));
@@ -455,13 +507,33 @@ class _TaskEditorState extends State<TaskEditor> {
     }
   }
 
-  String _initTime(DateTime? dateTime, bool? scheduledTime) {
-    String timeTemplate = "HH:mm";
-    String formatedTime = timeTemplate;
-    if (dateTime != null && scheduledTime != null && scheduledTime == true) {
-      formatedTime = DateFormat(timeTemplate).format(dateTime);
+  String _initReminderDate(DateTime? dateTime, AppLocalizations l10n) {
+    String template = "yyyy-MM-dd";
+    String formated = l10n.setDate;
+    if (dateTime != null) {
+      formated = DateFormat(template).format(dateTime);
     }
-    return formatedTime;
+    return formated;
+  }
+
+  String _initReminderTime(DateTime? dateTime, AppLocalizations l10n) {
+    String template = "HH:mm";
+    String formated = l10n.setTime; // Default behavior if null
+
+    if (dateTime != null) {
+      // Check if it matches default time
+      var defaultTimeStr = SettingsController.getInstance().defaultReminderTime;
+      var defaultTime = DateFormat("HH:mm").parse(defaultTimeStr);
+
+      if (dateTime.hour == defaultTime.hour &&
+          dateTime.minute == defaultTime.minute) {
+        // Matches default, showing "Set Time" acts as "Use Default / Blank"
+        formated = l10n.setTime;
+      } else {
+        formated = DateFormat(template).format(dateTime);
+      }
+    }
+    return formated;
   }
 
   String _initLink(Task? task) {

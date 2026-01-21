@@ -875,4 +875,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String newTaskDefaults(Object name) {
     return 'New Task Defaults ($name)';
   }
+
+  @override
+  String get setDate => 'Set Date';
+
+  @override
+  String get setTime => 'Set Time';
 }

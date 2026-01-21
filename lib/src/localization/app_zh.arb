@@ -308,5 +308,7 @@
   "apiKeyMissing": "❌ API Key 未配置。请在设置页面的 AI 助手分类中填写 API Key。",
   
   "todayTaskDefaults": "今日任务默认设置",
-  "newTaskDefaults": "新任务默认设置 ({name})"
+  "newTaskDefaults": "新任务默认设置 ({name})",
+  "setDate": "设置日期",
+  "setTime": "设置时间"
 }

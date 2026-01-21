@@ -4,6 +4,7 @@ import 'package:obsi/src/core/filename_date_extractor.dart';
 import 'package:obsi/src/core/tasks/markdown_task_markers.dart';
 import 'package:obsi/src/core/tasks/task.dart';
 import 'package:obsi/src/core/tasks/task_source.dart';
+import 'package:obsi/src/screens/settings/settings_controller.dart';
 import 'package:tuple/tuple.dart';
 
 class TaskParser extends MarkdownTaskMarkers {
@@ -22,21 +23,54 @@ class TaskParser extends MarkdownTaskMarkers {
     return found.value;
   }
 
-//pattern for time is either (@yyyy-MM-dd HH:mm) or (@HH:mm)
+//pattern for time is either (@yyyy-MM-dd HH:mm) or (@yyyy-MM-dd) or (@HH:mm)
   Tuple2<DateTime?, String> _getScheduledDateTimeInReminderFormat(
-      String source) {
-    final RegExp timeRegex =
-        RegExp(r'\(@(\d{4}-\d{2}-\d{2} )?([01]\d|2[0-3]):([0-5]\d)\)');
+      String source, DateTime? scheduledDate) {
+    // Regex matches:
+    // 1. (@yyyy-MM-dd HH:mm)
+    // 2. (@yyyy-MM-dd)
+    // 3. (@HH:mm)
+    final RegExp timeRegex = RegExp(
+        r'\(@((\d{4}-\d{2}-\d{2})( (\d{1,2}:\d{2}))?|(\d{1,2}:\d{2}))\)');
     final match = timeRegex.firstMatch(source);
 
     if (match != null) {
-      DateTime dateTime;
-      if (match.group(1) != null) {
-        dateTime = DateFormat('yyyy-MM-dd HH:mm')
-            .parse('${match.group(1)}${match.group(2)}:${match.group(3)}');
-      } else {
-        dateTime = DateTime(
-            0, 0, 0, int.parse(match.group(2)!), int.parse(match.group(3)!));
+      String content = match.group(1)!;
+      DateTime? dateTime;
+
+      if (content.contains('-') && content.contains(':')) {
+        // (@yyyy-MM-dd HH:mm)
+        try {
+          dateTime = DateFormat('yyyy-MM-dd HH:mm').parse(content);
+        } catch (e) {
+          Logger().e("Error parsing reminder date time: $content");
+        }
+      } else if (content.contains('-')) {
+        // (@yyyy-MM-dd) - Append default time
+        try {
+          String defaultTime =
+              SettingsController.getInstance().defaultReminderTime;
+          dateTime =
+              DateFormat('yyyy-MM-dd HH:mm').parse("$content $defaultTime");
+        } catch (e) {
+          Logger().e("Error parsing reminder date only: $content");
+        }
+      } else if (content.contains(':')) {
+        // (@HH:mm) - Attach to scheduled date if available
+        if (scheduledDate != null) {
+          try {
+            DateTime time = DateFormat('HH:mm').parse(content);
+            dateTime = DateTime(
+              scheduledDate.year,
+              scheduledDate.month,
+              scheduledDate.day,
+              time.hour,
+              time.minute,
+            );
+          } catch (e) {
+            Logger().e("Error parsing reminder time only: $content");
+          }
+        }
       }
 
       final updatedSource = source.replaceFirst(timeRegex, '');
@@ -194,33 +228,15 @@ class TaskParser extends MarkdownTaskMarkers {
 
     DateTime? scheduledDateTime = scheduledDateRes.item1;
 
-    // scheduled time could be set directly in scheduled date, if so then no need to find it separately
-    if (!(scheduledDateRes.item1 != null &&
-        scheduledDateRes.item1!.second == 1)) {
-      var scheduledTimeInReminderFormat =
-          _getScheduledDateTimeInReminderFormat(textOnly);
-      //if there is time set in task in format (@HH:mm) then it is used as a marker that time is set
-      //if there is not date but there is time then this is incorrect format and no schedule is set
-      if (scheduledTimeInReminderFormat.item1 != null) {
-        if (!(scheduledDateRes.item1 == null &&
-            scheduledTimeInReminderFormat.item1?.year == -1)) {
-          scheduledDateTime = DateTime(
-              scheduledDateRes.item1 == null
-                  ? scheduledTimeInReminderFormat.item1!.year
-                  : scheduledDateRes.item1!.year,
-              scheduledDateRes.item1 == null
-                  ? scheduledTimeInReminderFormat.item1!.month
-                  : scheduledDateRes.item1!.month,
-              scheduledDateRes.item1 == null
-                  ? scheduledTimeInReminderFormat.item1!.day
-                  : scheduledDateRes.item1!.day,
-              scheduledTimeInReminderFormat.item1!.hour,
-              scheduledTimeInReminderFormat.item1!.minute,
-              1);
-          textOnly = scheduledTimeInReminderFormat.item2;
-        }
-      }
-    }
+    // Parse reminder independently
+    // Note: If parsing (@HH:mm), we need the scheduled date to give it context.
+    var reminderRes =
+        _getScheduledDateTimeInReminderFormat(textOnly, scheduledDateTime);
+    DateTime? reminderDateTime = reminderRes.item1;
+    // Only update textOnly if we actually found a reminder OR matched a pattern
+    // _getScheduledDateTimeInReminderFormat updates textOnly regardless of whether it returned a valid date (if it matched regex)
+    // Wait, it returns updated source.
+    textOnly = reminderRes.item2;
 
     var doneDate =
         _extractDateAfterMarker(textOnly, MarkdownTaskMarkers.doneDateMarker);
@@ -260,7 +276,8 @@ class TaskParser extends MarkdownTaskMarkers {
         done: doneDate.item1,
         cancelled: cancelledDate.item1,
         recurranceRule: recurranceRule.item1,
-        taskSource: taskSource);
+        taskSource: taskSource,
+        reminder: reminderDateTime);
   }
 
   Task build(String contentSource,
@@ -306,9 +323,11 @@ class TaskParser extends MarkdownTaskMarkers {
       serializedTask += ' $tagsString';
     }
 
-    if (task.scheduled != null && task.scheduledTime) {
-      var time = DateFormat("HH:mm").format(task.scheduled!);
-      serializedTask += " (@$time)";
+    // Write reminder if exists
+    if (task.reminder != null) {
+      // Use standard format (@yyyy-MM-dd HH:mm)
+      var reminderStr = DateFormat("yyyy-MM-dd HH:mm").format(task.reminder!);
+      serializedTask += " (@$reminderStr)";
     }
 
     serializedTask += getPriorityMarker(task.priority);

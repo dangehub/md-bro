@@ -37,7 +37,7 @@ List<TextSpan> buildHighlightedTextSpans(String text, String highlight,
 
 Widget addDateTimePicker(Text showDateTime, DateTime? selectorDateTime,
     BuildContext context, Function(DateTime) dateTimeSelected,
-    {bool timePicker = false}) {
+    {bool timePicker = false, bool dateTimePicker = false}) {
   return TextButton(
       onPressed: () {
         if (timePicker) {
@@ -48,15 +48,19 @@ Widget addDateTimePicker(Text showDateTime, DateTime? selectorDateTime,
               currentTime: selectorDateTime,
               locale: LocaleType.en);
         } else {
-          showCalendarDatePicker2WithoutActionsDialog(
+          showCalendarDatePicker2Dialog(
             context: context,
-            config: CalendarDatePicker2Config(),
+            config: CalendarDatePicker2WithActionButtonsConfig(
+              firstDate: DateTime(1990),
+              lastDate: DateTime(2100),
+              currentDate: DateTime.now(),
+              calendarType: CalendarDatePicker2Type.single,
+            ),
             dialogSize: const Size(325, 400),
-            dateTimeSelected: dateTimeSelected,
             value: [selectorDateTime],
             borderRadius: BorderRadius.circular(15),
           ).then((List<DateTime?>? dates) {
-            if (dates != null && dates.isNotEmpty) {
+            if (dates != null && dates.isNotEmpty && dates[0] != null) {
               dateTimeSelected(dates[0]!);
             }
           });
